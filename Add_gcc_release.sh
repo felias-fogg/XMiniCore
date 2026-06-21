@@ -18,9 +18,9 @@ HOST2="x86_64-mingw32"
 HOST3="x86_64-apple-darwin"
 HOST4="arm64-apple-darwin"
 
-FILE1=avr-gnu-toolchain-${MC_VERSION}.${MC_PATCH_LEVEL}-${OS_PLATFORM1}.tar.gz
-FILE2=avr-gnu-toolchain-${MC_VERSION}.${MC_PATCH_LEVEL}-${OS_PLATFORM2}.zip
-FILE3=avr-gnu-toolchain-${MC_VERSION}.${MC_PATCH_LEVEL}-${OS_PLATFORM3}.tar.gz
+FILE1=avr8-gnu-toolchain-${MC_VERSION}.${MC_PATCH_LEVEL}-${OS_PLATFORM1}.tar.gz
+FILE2=avr8-gnu-toolchain-${MC_VERSION}.${MC_PATCH_LEVEL}-${OS_PLATFORM2}.zip
+FILE3=avr8-gnu-toolchain-${MC_VERSION}.${MC_PATCH_LEVEL}-${OS_PLATFORM3}.tar.gz
 
 URL1=https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/SoftwareTools/${FILE1}
 URL2=https://ww1.microchip.com/downloads/aemDocuments/documents/DEV/ProductDocuments/SoftwareTools/${FILE2}
