@@ -90,7 +90,7 @@ jq -r                                    \
 --arg file_name   $REPOSITORY-${DOWNLOADED_FILE#"v"}.tar.bz2  \
 '.packages[].platforms[.packages[].platforms | length] |= . +
 {
-  "name": $repository,
+  "name": "XMiniCore (GCC15)",
   "architecture": "avr",
   "version": $version,
   "category": "Contributed",
@@ -111,9 +111,9 @@ jq -r                                    \
   ],
     "toolsDependencies": [
     {
-      "packager": "arduino",
+      "packager": "XMiniCore",
       "name": "avr-gcc",
-      "version": "7.3.0-atmel3.6.1-arduino7"
+      "version": "15.1.0-microchip4.0.0-01"
     },
     {
       "packager": "XMiniCore",
