@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v1.1.1
+
+- fixed order of options
+- added cpp_flags
+
 ## v1.1.0
 
 - pragma added (so that one can choose the language variant)
