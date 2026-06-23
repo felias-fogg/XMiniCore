@@ -5,7 +5,7 @@ REM %1 = absolute path to avr-g++
 REM %2 = sketch path
 REM %3 = build path
 REM %4 = build project name
-REM %5 = flag name ("release_flags" or "debug_flags")
+REM %5 = flag name ("release_flags", "debug_flags", or "cpp_flags")
 
 set "COMPILER=%~1"
 set "SKETCH_PATH=%~2"
@@ -88,7 +88,7 @@ for /f "usebackq delims=" %%L in ("%TMP_OUT%") do (
   call :collapse_spaces LINE
 
   REM Now we can match deterministically
-  REM Accept both "pragma arduino debug_flags" and "pragma arduino release_flags"
+  REM Accept both "pragma arduino debug_flags", "pragma arduino release_flags", and "pragma arduino cpp_flags"
   echo "!LINE!" | findstr /I /C:"pragma arduino %FLAG_NAME% " >nul
   if not errorlevel 1 (
     if !HASH! EQU 1 (
@@ -172,5 +172,5 @@ endlocal & set "%~1=%s%"
 exit /b
 
 :usage
-echo Usage: %~nx0 ^<path-to-avr-g++^> ^<sketch_path^> ^<build_path^> ^<project_name^> ^<debug_flags^|release_flags^|build_flags^>
+echo Usage: %~nx0 ^<path-to-avr-g++^> ^<sketch_path^> ^<build_path^> ^<project_name^> ^<debug_flags^|release_flags^|cpp_flags^>
 exit /b 2

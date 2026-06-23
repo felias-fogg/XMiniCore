@@ -1,28 +1,29 @@
 # XMiniCore
 
-This is a debug-enabled Arduino core for the *ATmega Xplained Mini* series of Microchip development boards. These boards with an Arduino UNO R3 footprint contain in addition to an ATmega328 or ATmega168 MCU an embedded debugger and programmer. With [PyAvrOCD](https://pyavrocd.io), this makes them a plug-and-play solution for debugging using the Arduino IDE 2. In other words, this is the perfect solution for developing Arduino UNO R3 projects.
+This is a debug-enabled Arduino core for the *ATmega Xplained Mini* series of Microchip development boards. These boards with an Arduino UNO R3 footprint contain in addition to an ATmega328P(B) or ATmega168PB MCU an embedded debugger and programmer. With [PyAvrOCD](https://pyavrocd.io), this makes them a plug-and-play solution for debugging using the Arduino IDE 2. In other words, this is the perfect solution for developing Arduino UNO R3 projects.
 
 The core is a fork of [MCUdude's MiniCore](https://github.com/MCUdude/MiniCore), tailored to the pecularities of the Xplained Mini boards. It is meant to be a replacement for the [Atmel AVR Xplained-minis](https://github.com/AtmelUniversityFrance/atmel-avr-xmini-boardmanagermodule) board package.
 
 # Table of contents
 
-- [Supported boards](#supported-boards)
-- [Supported clock frequencies](#supported-clock-frequencies)
-- [Debug option](#debug-option)
-- [EEPROM retain option](eeprom-retain-option)
-- [Printf support](#printf-support)
-- [Pin macros](#pin-macros)
-- [Wiring reference](#wiring-reference)
-- [Programmers](#programmers)
-- **[How to install](#how-to-install)**
-  - [Boards Manager Installation](#boards-manager-installation)
-  - [Manual Installation](#manual-installation)
-  - [Arduino CLI Installation](#arduino-cli-installation)
-  - [PlatformIO](#platformio)
-- **[Getting started with XMiniCore](#getting-started-with-xminicore)**
-     - [Upload or debug](#upload-or-debug)
-     - [Powering external circuitry](#powering-external-circuitry ) 
-     - [More options](further-options)
+* [Supported boards](#supported-boards)
+* [Supported clock frequencies](#supported-clock-frequencies)
+* [Debug option](#debug-option)
+* [EEPROM retain option](#eeprom-retain-option)
+* [Printf support](#printf-support)
+* [Pin macros](#pin-macros)
+* [Wiring reference](#wiring-reference)
+* [Pragma directive](#pragma-directive)
+* [Programmers](#programmers)
+* **[How to install](#how-to-install)**
+  * [Boards Manager Installation](#boards-manager-installation)
+  * [Manual Installation](#manual-installation)
+  * [Arduino CLI Installation](#arduino-cli-installation)
+  * [PlatformIO](#platformio)
+* **[Getting started with XMiniCore](#getting-started-with-xminicore)**
+     * [Upload or debug](#upload-or-debug)
+     * [Powering external circuitry](#powering-external-circuitry ) 
+     * [More options](#more-options)
 
 - [Pinout diagram](#pinout-diagram)
 
@@ -90,6 +91,19 @@ digitalWrite(13, HIGH);
 To extend this core's functionality a bit further, MCUdude added a few missing Wiring functions. As many of you know, Arduino is based on Wiring, but that doesn't mean the Wiring development isn't active. These functions are used as "regular" Arduino functions, and there's no need to include an external library.
 
 For further information, please view the [Wiring reference page](https://github.com/MCUdude/MiniCore/blob/master/Wiring_reference.md) of MiniCore.
+
+## Pragma directive
+XMiniCore copied from [TinyCore](https://github.com/MCUdude/TinyCore) the custom `#pragma arduino` directives that allow you to specify build flags directly from the sketch.
+
+```c
+#pragma arduino release_flags ...
+#pragma arduino debug_flags ...
+#pragma arduino cpp_flags ...
+```
+
+These directives append flags to the build command line depending on the active build mode.  For instance, `#pragma arduino release_flags -mrelax` will enable the `-mrelax` code optimization for a release build (when `Optimize for Debugging` is disabled). The third type of directive can be used to select the C++ language variant, e.g.,  `#pragma arduino cpp_flags -std=c++29`.
+
+Read more about these `#pragma` directives and how to use them in [pragma.md](https://github.com/MCUdude/TinyCore/blob/main/pragma.md) of the TinyCore repo.
 
 ## Programmers
 

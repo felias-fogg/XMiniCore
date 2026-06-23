@@ -13,7 +13,7 @@ touch "$3/options.$5"
 cp "$3/options.$5" "$3/options.$5.bak"
 
 # create new option file
-$1 -fpreprocessed -dD -E -x c++ "$2/$4" | grep -E "^\s*#\s*pragma\s+arduino\s+$5" | sed -E 's/# *pragma +arduino +(debug|release|build)_flags//g' | tr '\n' ' ' >"$3/options.$5"
+$1 -fpreprocessed -dD -E -x c++ "$2/$4" | grep -E "^\s*#\s*pragma\s+arduino\s+$5" | sed -E 's/# *pragma +arduino +(debug|release|cpp)_flags//g' | tr '\n' ' ' >"$3/options.$5"
 
 # compare old and new options
 # if different, then delete all cached *.o and *.a files

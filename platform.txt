@@ -5,7 +5,7 @@
 # https://arduino.github.io/arduino-cli/latest/platform-specification/
 
 name=XMiniCore (GCC15)
-version=1.1.0
+version=1.1.1
 
 # AVR compile variables
 # ---------------------
@@ -25,12 +25,12 @@ compiler.warning_flags.all=-Wall -Wextra
 # Default "compiler.path" is correct, change only if you want to override the initial value
 compiler.path={runtime.tools.avr-gcc.path}/bin/
 compiler.c.cmd=avr-gcc
-compiler.c.flags=-c {compiler.optimization_flags} {compiler.warning_flags} -std=gnu11 -ffunction-sections -fdata-sections -MMD
+compiler.c.flags=-c {compiler.warning_flags} -std=gnu11 {compiler.optimization_flags}  -ffunction-sections -fdata-sections -MMD
 compiler.c.elf.flags={compiler.warning_flags} {compiler.optimization_flags} -Wl,--gc-sections
 compiler.c.elf.cmd=avr-gcc
 compiler.S.flags=-c  {compiler.optimization_flags} -x assembler-with-cpp
 compiler.cpp.cmd=avr-g++
-compiler.cpp.flags=-c {compiler.optimization_flags} {compiler.warning_flags} -std=gnu++17 -fpermissive -fno-exceptions -ffunction-sections -fdata-sections -fno-threadsafe-statics -MMD
+compiler.cpp.flags=-c {compiler.warning_flags} -std=gnu++17 {compiler.optimization_flags} "@{build.path}/options.cpp_flags" -fpermissive -fno-exceptions -ffunction-sections -fdata-sections -fno-threadsafe-statics -MMD
 compiler.ar.cmd=avr-gcc-ar
 compiler.ar.flags=rcs
 compiler.objcopy.cmd=avr-objcopy
@@ -164,8 +164,10 @@ build.usb_flags=-DUSB_VID={build.vid} -DUSB_PID={build.pid} '-DUSB_MANUFACTURER=
 # Generating options.XXXX_flags using #pragma
 recipe.hooks.prebuild.1.pattern=/bin/bash "{runtime.platform.path}/scripts/pragma.sh" "{compiler.path}{compiler.cpp.cmd}" "{build.source.path}" "{build.path}" "{build.project_name}" debug_flags
 recipe.hooks.prebuild.2.pattern=/bin/bash "{runtime.platform.path}/scripts/pragma.sh" "{compiler.path}{compiler.cpp.cmd}" "{build.source.path}" "{build.path}" "{build.project_name}" release_flags
+recipe.hooks.prebuild.3.pattern=/bin/bash "{runtime.platform.path}/scripts/pragma.sh" "{compiler.path}{compiler.cpp.cmd}" "{build.source.path}" "{build.path}" "{build.project_name}" cpp_flags
 recipe.hooks.prebuild.1.pattern.windows="{runtime.platform.path}\scripts\pragma.bat" "{compiler.path}{compiler.cpp.cmd}" "{build.source.path}" "{build.path}" "{build.project_name}" debug_flags
 recipe.hooks.prebuild.2.pattern.windows="{runtime.platform.path}\scripts\pragma.bat" "{compiler.path}{compiler.cpp.cmd}" "{build.source.path}" "{build.path}" "{build.project_name}" release_flags
+recipe.hooks.prebuild.3.pattern.windows="{runtime.platform.path}\scripts\pragma.bat" "{compiler.path}{compiler.cpp.cmd}" "{build.source.path}" "{build.path}" "{build.project_name}" cpp_flags
 
 
 # Debugger configuration (general options)
