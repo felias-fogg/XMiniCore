@@ -17,8 +17,8 @@ fi
 # check if already there (same mcu, mcu clock, and same prelaunch commands)
 if grep -q "\"--device=$2\"" "$1/.vscode/launch.json" 2>/dev/null; then
     if grep -q \"--F_CPU=$6\" 2>/dev/null; then
-        if [ -z "$8" ] || [ $(grep -c "$8"  2>/dev/null) -gt 0 ]; then
-            if [ -z "$9" ] || [ $(grep -c "$9"  2>/dev/null) -gt 0 ]; then
+        if [ -z "$7" ] || [ $(grep -c "$7"  2>/dev/null) -gt 0 ]; then
+            if [ -z "$8" ] || [ $(grep -c "$8"  2>/dev/null) -gt 0 ]; then
                 echo "launch.json already exists"
                 exit
             fi
