@@ -90,7 +90,7 @@ jq -r                                    \
 --arg file_name   $REPOSITORY-${DOWNLOADED_FILE#"v"}.tar.bz2  \
 '.packages[].platforms[.packages[].platforms | length] |= . +
 {
-  "name": "XMiniCore (GCC15)",
+  "name": "XMiniCore",
   "architecture": "avr",
   "version": $version,
   "category": "Contributed",
