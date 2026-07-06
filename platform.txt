@@ -170,7 +170,7 @@ recipe.hooks.prebuild.2.pattern.windows="{runtime.platform.path}\scripts\pragma.
 recipe.hooks.prebuild.3.pattern.windows="{runtime.platform.path}\scripts\pragma.bat" "{compiler.path}{compiler.cpp.cmd}" "{build.source.path}" "{build.path}" "{build.project_name}" cpp_flags
 
 # Generating launch.json file
-recipe.hooks.sketch.prebuild.1.pattern=/bin/bash "{runtime.platform.path}/scripts/launch.sh" "{build.source.path}" "{build.mcu}" "{build.path}/{build.project_name}.elf" "{runtime.tools.avrocd-tools.path}" "{runtime.tools.avr-gcc.path}" "{build.f_cpu}" "monitor debugwire enable" "monitor atexit {build.atexit}"
+recipe.hooks.sketch.prebuild.1.pattern=/bin/bash "{runtime.platform.path}/scripts/launch.sh" "{build.source.path}" "{build.mcu}" "{build.path}/{build.project_name}.elf" "{runtime.tools.avrocd-tools.path}" "{runtime.tools.avr-gcc.path}" "{build.f_cpu}" "{debug.cortex-debug.custom.serverArgs.1}" "monitor debugwire enable" "monitor atexit {build.atexit}"
 
 # Debugger configuration (general options)
 # ----------------------------------------

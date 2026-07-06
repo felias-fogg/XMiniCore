@@ -6,8 +6,16 @@
 # $4 = debug.toolchain.path
 # $5 = runtime.tools.avr-gcc.path
 # $6 = build.f_cpu
-# $7 = prelaunch1
-# $8 = prelaunch2
+# $7 = simavr
+# $8 = prelaunch1
+# $9 = prelaunch2
+
+# construct -s argument
+if [ -z "$7" ]; then
+    start="nop"
+else
+    start=$7
+fi
 
 # check for .vscode
 if [ ! -d "$1/.vscode" ]; then
@@ -16,8 +24,9 @@ if [ ! -d "$1/.vscode" ]; then
 fi
 # check if already there
 if grep -q "\"name\": \"Arduino Debug $2\"" "$1/.vscode/launch.json" 2>/dev/null; then
-    echo "launch.json already exists"
-    exit
+    if grep -q \"$start\" 2>/dev/null; then
+       echo "launch.json already exists"
+       exit
 fi
 # construct prelaunch commands string
 if [[ -n "$8" ]]; then
@@ -58,7 +67,7 @@ cat > "$1/.vscode/launch.json" <<EOF
             "runToEntryPoint": "main",
             "serverArgs": [
                 "-s",
-                "nop",
+                "$start",
                 "--device",
                 "$2",
                 "--manage",
