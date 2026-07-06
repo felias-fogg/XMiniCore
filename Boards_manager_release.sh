@@ -111,9 +111,9 @@ jq -r                                    \
   ],
     "toolsDependencies": [
     {
-      "packager": "XMiniCore",
+      "packager": "arduino",
       "name": "avr-gcc",
-      "version": "15.1.0-microchip4.0.0-01"
+      "version": "7.3.0-atmel3.6.1-arduino7"
     },
     {
       "packager": "XMiniCore",
