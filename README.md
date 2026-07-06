@@ -1,6 +1,6 @@
 # XMiniCore
 
-This is a debug-enabled Arduino core for the *ATmega Xplained Mini* series of Microchip development boards. These boards with an Arduino UNO R3 footprint contain in addition to an ATmega328P(B) or ATmega168PB MCU an embedded debugger and programmer. With [PyAvrOCD](https://pyavrocd.io), this makes them a plug-and-play solution for debugging using the Arduino IDE 2. In other words, this is the perfect solution for developing Arduino UNO R3 projects.
+This is a debug-enabled Arduino core for the *ATmega Xplained Mini* series of Microchip development boards. These boards with an Arduino UNO R3 footprint contain in addition to an ATmega328P(B) or ATmega168PB MCU an embedded debugger and programmer. With [PyAvrOCD](https://pyavrocd.io), this makes them a plug-and-play solution for debugging using the Arduino IDE 2, PlatformIO, and the VS Code extension _Arduino Maker Workshop_. In other words, this is the perfect solution for developing Arduino UNO R3 projects.
 
 The core is a fork of [MCUdude's MiniCore](https://github.com/MCUdude/MiniCore), tailored to the pecularities of the Xplained Mini boards. It is meant to be a replacement for the [Atmel AVR Xplained-minis](https://github.com/AtmelUniversityFrance/atmel-avr-xmini-boardmanagermodule) board package.
 
@@ -175,7 +175,7 @@ If you want to upload a sketch to the board or you want to debug it, proceed as 
 
 If you are powering some connected circuitry, e.g., an Arduino shield, from the development board, then you should make sure to power it from the `IOREF` pin and not from the `5V` or `3.3V` pin. The reason for that is that `IOREF` is under the control of the on-board debugger, while the `5V` and `3.3V` pins are not controlled. When the on-board debugger power-cycles the target chip in order to enter debugWIRE mode, then `IOREF` will also be switched off and on again, while `5V` and `3.3V` always deliver power. In the latter case, it will make the automatic power-cycle feature useless. The same is true when such external circuits are powered externally. 
 
-In the case where external power cannot be automatically disconnected, one has to proceed as follows in order to debug a sketch:
+In the case where external power cannot be automatically disconnected, one has to proceed as follows in order to debug a sketch in the **Arduino IDE 2**:
 
 1. Select `Debug mode` = `stay at exit` in the `Tools` menu,
 
@@ -188,6 +188,8 @@ In the case where external power cannot be automatically disconnected, one has t
 If you use the `Upload` button, debugWIRE mode will be terminated. In this case, you have to start at step 2 again.
 
 If you want to leave debugWIRE mode and unprogram the DWEN fuse, type into the `Debug Console` the command `monitor debugwire disable` and leave the debugger afterward. 
+
+In **PlatformIO**, you only have to make sure that the first time you start debugging, all external circuits are disconnected. After that, you can reconnect the external circuits. The board will stay in debugWIRE mode.
 
 #### More options
 
