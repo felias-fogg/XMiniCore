@@ -6,27 +6,24 @@
 # $4 = debug.toolchain.path
 # $5 = runtime.tools.avr-gcc.path
 # $6 = build.f_cpu
-# $7 = simavr
-# $8 = prelaunch1
-# $9 = prelaunch2
-
-# construct -s argument
-if [ -z "$7" ]; then
-    start="nop"
-else
-    start=$7
-fi
+# $7 = prelaunch1
+# $8 = prelaunch2
 
 # check for .vscode
 if [ ! -d "$1/.vscode" ]; then
     echo "No .vscode folder"
     exit
 fi
-# check if already there
-if grep -q "\"name\": \"Arduino Debug $2\"" "$1/.vscode/launch.json" 2>/dev/null; then
-    if grep -q \"$start\" 2>/dev/null; then
-       echo "launch.json already exists"
-       exit
+# check if already there (same mcu, mcu clock, and same prelaunch commands)
+if grep -q "\"--device=$2\"" "$1/.vscode/launch.json" 2>/dev/null; then
+    if grep -q \"--F_CPU=$6\" 2>/dev/null; then
+        if [ -z "$8" ] || [ $(grep -c "$8"  2>/dev/null) -gt 0 ]; then
+            if [ -z "$9" ] || [ $(grep -c "$9"  2>/dev/null) -gt 0 ]; then
+                echo "launch.json already exists"
+                exit
+            fi
+        fi
+    fi
 fi
 # construct prelaunch commands string
 if [[ -n "$8" ]]; then
@@ -49,7 +46,7 @@ EOF
 else
     prelaunch=""
 fi
-
+# generate launch.json
 cat > "$1/.vscode/launch.json" <<EOF 
 {
     "version": "0.2.0",
@@ -66,16 +63,36 @@ cat > "$1/.vscode/launch.json" <<EOF
             "overrideGDBServerStartedRegex": "Listening on port \\\\d+ for gdb connection",
             "runToEntryPoint": "main",
             "serverArgs": [
-                "-s",
-                "$start",
-                "--device",
-                "$2",
-                "--manage",
-                "all",
-                "--F_CPU",
-                "$6",
-                "--prog-clock",
-                "2000"
+                "--start=nop",
+                "--device=$2",
+                "--manage=all",
+                "--F_CPU=$6",
+                "--prog-clock=2000"
+            ],
+            "serverpath": "$4/pyavrocd",
+            "servertype": "openocd",
+            "armToolchainPath": "$4",
+            "configFiles": [
+                "nix"
+            ]$prelaunch
+        },
+        {
+            "name": "Simavr $2",
+            "cwd": "\${workspaceRoot}",
+            "request": "launch",
+            "type": "cortex-debug",
+            "executable": "$3",
+            "svdFile": "$4/pyavrocd-util/svd/$2.svd",
+            "gdbPath": "$4/avr-gdb",
+            "objdumpPath": "$5/bin/avr-objdump",
+            "overrideGDBServerStartedRegex": "Listening on port \\\\d+ for gdb connection",
+            "runToEntryPoint": "main",
+            "serverArgs": [
+                "--start=$4/bin/simavr",
+                "--device=$2",
+                "--manage=all",
+                "--F_CPU=$6",
+                "--prog-clock=2000"
             ],
             "serverpath": "$4/pyavrocd",
             "servertype": "openocd",
@@ -84,6 +101,6 @@ cat > "$1/.vscode/launch.json" <<EOF
                 "nix"
             ]$prelaunch
         }
-    ]
+    ]   
 }
 EOF
