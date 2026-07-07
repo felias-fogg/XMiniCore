@@ -11,16 +11,24 @@ REM %6 = build.f_cpu
 REM %7 = prelaunch1
 REM %8 = prelaunch2
 
-set "P1=%~1"
-set "P2=%~2"
-set "P3=%~3"
-set "P4=%~4"
-set "P5=%~5"
-set "P6=%~6"
-set "P7=%~7"
-set "P8=%~8"
+set "V1=%~1"
+set "P1=%V1:\=\\%"
+set "V2=%~2"
+set "P2=%V2:\=\\%"
+set "V3=%~3"
+set "P3=%V3:\=\\%"
+set "V4=%~4"
+set "P4=%V4:\=\\%"
+set "V5=%~5"
+set "P5=%V5:\=\\%"
+set "V6=%~6"
+set "P6=%V6:\=\\%"
+set "V7=%~7"
+set "P7=%V7:\=\\%"
+set "V8=%~8"
+set "P8=%V8:\=\\%"
 
-set "LAUNCH=%P1%\.vscode\launch.json"
+set "LAUNCH=%P1%\\.vscode\\launch.json"
 
 REM check for .vscode
 if not exist "%P1%\.vscode\" (
@@ -65,9 +73,9 @@ REM write JSON base + first config start
     echo             "request": "launch",
     echo             "type": "cortex-debug",
     echo             "executable": "%P3%",
-    echo             "svdFile": "%P4%/pyavrocd-util/svd/%P2%.svd",
-    echo             "gdbPath": "%P4%/avr-gdb",
-    echo             "objdumpPath": "%P5%/bin/avr-objdump",
+    echo             "svdFile": "%P4%\\pyavrocd-util\\svd\\%P2%.svd",
+    echo             "gdbPath": "%P4%\\avr-gdb.exe",
+    echo             "objdumpPath": "%P5%\\bin\\avr-objdump.exe",
     echo             "overrideGDBServerStartedRegex": "Listening on port \\d+ for gdb connection",
     echo             "runToEntryPoint": "main",
     echo             "serverArgs": [
@@ -77,7 +85,7 @@ REM write JSON base + first config start
     echo                 "--F_CPU=%P6%",
     echo                 "--prog-clock=2000"
     echo             ],
-    echo             "serverpath": "%P4%/pyavrocd",
+    echo             "serverpath": "%P4%\\pyavrocd.exe",
     echo             "servertype": "openocd",
     echo             "armToolchainPath": "%P4%",
     echo             "configFiles": [
@@ -112,19 +120,19 @@ REM close first config, open second config
     echo             "request": "launch",
     echo             "type": "cortex-debug",
     echo             "executable": "%P3%",
-    echo             "svdFile": "%P4%/pyavrocd-util/svd/%P2%.svd",
-    echo             "gdbPath": "%P4%/avr-gdb",
-    echo             "objdumpPath": "%P5%/bin/avr-objdump",
+    echo             "svdFile": "%P4%\\pyavrocd-util\\svd\\%P2%.svd",
+    echo             "gdbPath": "%P4%\\avr-gdb.exe",
+    echo             "objdumpPath": "%P5%\\bin\\avr-objdump.exe",
     echo             "overrideGDBServerStartedRegex": "Listening on port \\d+ for gdb connection",
     echo             "runToEntryPoint": "main",
     echo             "serverArgs": [
-    echo                 "--start=%P4%/bin/simavr",
+    echo                 "--start=%P4%\\bin\\simavr.exe",
     echo                 "--device=%P2%",
     echo                 "--manage=all",
     echo                 "--F_CPU=%P6%",
     echo                 "--prog-clock=2000"
     echo             ],
-    echo             "serverpath": "%P4%/pyavrocd",
+    echo             "serverpath": "%P4%\\pyavrocd.exe",
     echo             "servertype": "openocd",
     echo             "armToolchainPath": "%P4%",
     echo             "configFiles": [
