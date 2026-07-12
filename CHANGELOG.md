@@ -1,4 +1,8 @@
 # CHANGELOG
+## v1.2.2
+- Rolled back `launch.json` generation. This is now handled by _Arduino
+  Maker Workshop_.
+
 ## v1.2.1
 - Fixed naming glitch (GCC15 still in title)
 - Fixing JSON problem under Windows: Double backslashes!
