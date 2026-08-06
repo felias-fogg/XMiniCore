@@ -1,5 +1,13 @@
 # CHANGELOG
+## v1.2.4
+- New PyAvrOCD version 1.5.8 (with new avr-gdb client 17.2.2
+  that does not crash anymore in Ubuntu 24.04).
+
+## v1.2.3
+- New PyAvrOCD version 1.5.7
+
 ## v1.2.2
+
 - Rolled back `launch.json` generation. This is now handled by _Arduino
   Maker Workshop_.
 
