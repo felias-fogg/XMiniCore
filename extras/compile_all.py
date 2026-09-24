@@ -164,9 +164,11 @@ def write_sketch(folder: str) -> str:
     """
     Put a sketch where arduino-cli can build it, below a directory whose name has
     a blank in it. The sketch name itself must not have one, but everything above
-    it may, and that is where an unquoted path in a recipe shows up.
+    it may, and that is where an unquoted path in a recipe shows up. A work-dir
+    that already has a blank in its name is one, so it does not get another.
     """
-    sketch = os.path.join(folder, "with blank", "compile_all_probe")
+    above = folder if " " in os.path.basename(folder) else os.path.join(folder, "with blank")
+    sketch = os.path.join(above, "compile_all_probe")
     os.makedirs(sketch, exist_ok=True)
     with open(os.path.join(sketch, "compile_all_probe.ino"), "w", encoding="utf-8") as out:
         out.write(SKETCH)
