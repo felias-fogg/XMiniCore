@@ -100,6 +100,11 @@ jobs:
           python XMiniCore/extras/compile_all.py --fqbn-prefix XMiniCore:avr \
                  --coverage "$COVERAGE" --max-builds "$MAX_BUILDS"
 
+      - name: Check that the prebuild hook picks up the pragmas
+        run: |
+          python XMiniCore/extras/check_hooks.py \
+                 --fqbn XMiniCore:avr:atmega328p_xplained_mini
+
   release:
     name: Publish
     runs-on: ubuntu-latest

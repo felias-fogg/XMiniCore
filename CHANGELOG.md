@@ -6,6 +6,9 @@
 - pragma.sh called the compiler unquoted, and its three rm calls had the
   wildcard inside the quotes, so the cached object files it meant to remove
   when the flags change were never removed
+- A check that the prebuild hook really delivers the '#pragma arduino' flags,
+  run on each of the three platforms. A hook that stops working is silent: the
+  options file stays empty, the flags are dropped and the build succeeds
 - pragma.bat ran 'echo | findstr' plus two subroutine calls for every line of
   the preprocessed source, tens of thousands of them, three times per compile.
   A single findstr over the file now leaves the few lines that can match. This
