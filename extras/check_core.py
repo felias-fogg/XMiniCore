@@ -185,8 +185,12 @@ def check_line_endings(root: str) -> None:
 
 
 def check_release(root: str, platform: dict, tag: str) -> None:
-    """Before a release the version has to be stated in the two places that say it."""
-    version = tag.lstrip("v")
+    """
+    Before a release the version has to be stated in the two places that say it.
+    A pre-release tag such as v1.3.2-rc1 is checked against 1.3.2: the point of
+    trying one out is not having to touch the version number for every attempt.
+    """
+    version = tag.lstrip("v").split("-", 1)[0]
     stated = platform.get("version")
     if stated != version:
         problem(f"platform.txt says version={stated}, but the tag says {version}")
