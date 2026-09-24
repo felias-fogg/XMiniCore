@@ -14,9 +14,11 @@ import argparse
 import itertools
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from check_core import properties, board_ids      # pylint: disable=wrong-import-position
@@ -185,19 +187,46 @@ def chosen_combinations(offered: dict, coverage: str) -> list:
     return each_value_once(offered)
 
 
-def compile_one(sketch: str, fqbn: str, quiet: bool) -> bool:
-    """Build one combination, saying what went wrong when it did."""
+def left_to_go(done_so_far: int, total: int, spent: float) -> str:
+    """A guess at the remaining time, from how long the builds so far have taken."""
+    if done_so_far == 0:
+        return ""
+    remaining = spent / done_so_far * (total - done_so_far)
+    return f", about {remaining / 60:.0f} min left" if remaining > 90 else ""
+
+
+def build_them_all(sketch: str, every: list) -> tuple:
+    """Build the lot, reporting progress as it goes. Returns failures and seconds."""
+    print(f"{len(every)} combination(s) to build", flush=True)
+    failed, started = [], time.monotonic()
+    for number, fqbn in enumerate(every, start=1):
+        if not compile_one(sketch, fqbn, number, len(every)):
+            failed.append(fqbn)
+        spent = time.monotonic() - started
+        if number % 10 == 0 and number != len(every):
+            print(f"          {number} of {len(every)} after {spent / 60:.1f} min"
+                  f"{left_to_go(number, len(every), spent)}", flush=True)
+    return failed, time.monotonic() - started
+
+
+def compile_one(sketch: str, fqbn: str, number: int, total: int) -> bool:
+    """Build one combination, saying how it went and how far along we are."""
     build = os.path.join(os.path.dirname(sketch), "build path")
-    done = subprocess.run(["arduino-cli", "compile", "--clean", "-b", fqbn,
-                           "--build-path", build, sketch],
-                          capture_output=True, text=True, check=False)
-    if done.returncode == 0:
-        if not quiet:
-            print(f"  ok      {fqbn}")
-        return True
-    print(f"  FAILED  {fqbn}")
-    print("    " + (done.stderr or done.stdout).strip().replace("\n", "\n    "))
-    return False
+    started = time.monotonic()
+    try:
+        done = subprocess.run(["arduino-cli", "compile", "--clean", "-b", fqbn,
+                               "--build-path", build, sketch],
+                              capture_output=True, text=True, check=False)
+    except OSError as err:
+        print(f"[{number:>3}/{total}] FAILED        {fqbn}\n    {err}", flush=True)
+        return False
+    took = time.monotonic() - started
+    mark = "ok    " if done.returncode == 0 else "FAILED"
+    print(f"[{number:>3}/{total}] {mark} {took:5.1f} s  {fqbn}", flush=True)
+    if done.returncode != 0:
+        print("    " + (done.stderr or done.stdout).strip().replace("\n", "\n    "),
+              flush=True)
+    return done.returncode == 0
 
 
 def main() -> int:
@@ -213,9 +242,11 @@ def main() -> int:
                         help="how much to build: every combination, every option "
                              "at least once, or just the default one. 'auto' takes "
                              "the full product while it stays small")
-    parser.add_argument("--quiet", action="store_true", help="only report failures")
     args = parser.parse_args()
 
+    if shutil.which("arduino-cli") is None:
+        print("arduino-cli is not on PATH, so there is nothing to build with")
+        return 1
     root = args.root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     boards = properties(os.path.join(root, "boards.txt"))
     platform = properties(os.path.join(root, "platform.txt"))
@@ -233,9 +264,9 @@ def main() -> int:
             for combination in chosen_combinations(offered, args.coverage):
                 fqbn = f"{args.fqbn_prefix}:{board}"
                 every.append(fqbn + (f":{combination}" if combination else ""))
-        failed = [fqbn for fqbn in every if not compile_one(sketch, fqbn, args.quiet)]
+        failed, spent = build_them_all(sketch, every)
 
-    print(f"{len(every)} combination(s), {len(failed)} failed")
+    print(f"{len(every)} combination(s) in {spent / 60:.1f} min, {len(failed)} failed")
     return 1 if failed else 0
 
 
