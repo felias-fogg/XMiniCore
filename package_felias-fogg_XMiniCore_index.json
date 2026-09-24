@@ -524,6 +524,49 @@
               "version": "1.6.1"
             }
           ]
+        },
+        {
+          "name": "XMiniCore",
+          "architecture": "avr",
+          "version": "1.3.2",
+          "category": "Contributed",
+          "url": "https://felias-fogg.github.io/XMiniCore/XMiniCore-1.3.2.tar.bz2",
+          "archiveFileName": "XMiniCore-1.3.2.tar.bz2",
+          "checksum": "SHA-256:17ed62fc56c811d2f71358271390a5ee1a2d4f673738ce7d9e896c15cc1c5497",
+          "size": "1179054",
+          "boards": [
+            {
+              "name": "Atmel atmega328p Xplained mini"
+            },
+            {
+              "name": "Atmel atmega328pb Xplained mini"
+            },
+            {
+              "name": "Atmel atmega168pb Xplained mini"
+            }
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "arduino",
+              "name": "avr-gcc",
+              "version": "7.3.0-atmel3.6.1-arduino7"
+            },
+            {
+              "packager": "XMiniCore",
+              "name": "avrdude",
+              "version": "8.1"
+            },
+            {
+              "packager": "arduino",
+              "name": "arduinoOTA",
+              "version": "1.3.0"
+            },
+            {
+              "packager": "XMiniCore",
+              "name": "avrocd-tools",
+              "version": "1.6.1"
+            }
+          ]
         }
       ],
       "tools": [
