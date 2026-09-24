@@ -31,11 +31,24 @@ echo "Platform will depend on avrdude ${AVRDUDE_VERSION}"
 PAOVERSION=$(curl -s https://api.github.com/repos/$PAOOWNER/PyAvrOCD/releases/latest | grep "tag_name" |  awk -F\" '{print $4}')
 AVROCDVERSION=${PAOVERSION#"v"}
 
-# Get the download URL for the latest release from Github
-DOWNLOAD_URL=$(curl -s https://api.github.com/repos/$AUTHOR/$REPOSITORY/releases/latest | grep "tarball_url" | awk -F\" '{print $4}')
+# A tag may be given as the first argument. Without one we take the latest
+# release, as before; with one we take exactly that tag, which is what a
+# pre-release needs: the "latest release" of the API never is one.
+TAG="$1"
 
-# Get filename
-DOWNLOADED_FILE=$(echo $DOWNLOAD_URL | awk -F/ '{print $8}')
+if [ -n "$TAG" ]; then
+    DOWNLOAD_URL="https://api.github.com/repos/$AUTHOR/$REPOSITORY/tarball/$TAG"
+    DOWNLOADED_FILE="$TAG"
+else
+    DOWNLOAD_URL=$(curl -s https://api.github.com/repos/$AUTHOR/$REPOSITORY/releases/latest | grep "tarball_url" | awk -F\" '{print $4}')
+    DOWNLOADED_FILE=$(echo $DOWNLOAD_URL | awk -F/ '{print $8}')
+fi
+
+if [ -z "$DOWNLOADED_FILE" ]; then
+    echo "Could not work out which version to package"
+    exit 1
+fi
+echo "Packaging ${DOWNLOADED_FILE}"
 
 # Check whether most recent board file is already in the index
 if grep -q ${REPOSITORY}-${DOWNLOADED_FILE#"v"} package_${REALAUTHOR}_${REPOSITORY}_index.json; then
@@ -69,8 +82,12 @@ printf "Done!\n"
 rm -rf ${DOWNLOADED_FILE}.tar.bz2
 ##rm -rf $REPOSITORY-${DOWNLOADED_FILE#"v"}/avr
 
-# Make sure there are no macOS related files added to the arching that's soon to be geneated
-dot_clean .
+# Make sure there are no macOS related files added to the archive that's soon to be
+# generated. dot_clean only exists on macOS; elsewhere there is nothing to clean.
+if command -v dot_clean > /dev/null 2>&1; then
+    dot_clean .
+fi
+find . -name "._*" -delete 2>/dev/null
 
 # Compress folder to tar.bz2
 printf "\nCompressing folder $REPOSITORY-${DOWNLOADED_FILE#"v"} to $REPOSITORY-${DOWNLOADED_FILE#"v"}.tar.bz2\n"
@@ -81,7 +98,12 @@ printf "Done!\n"
 FILE_SIZE=$(wc -c "$REPOSITORY-${DOWNLOADED_FILE#"v"}.tar.bz2" | awk '{print $1}')
 
 # Get SHA256 hash
-SHA256="SHA-256:$(shasum -a 256 "$REPOSITORY-${DOWNLOADED_FILE#"v"}.tar.bz2" | awk '{print $1}')"
+# shasum is a macOS thing, sha256sum a Linux one
+if command -v shasum > /dev/null 2>&1; then
+    SHA256="SHA-256:$(shasum -a 256 "$REPOSITORY-${DOWNLOADED_FILE#"v"}.tar.bz2" | awk '{print $1}')"
+else
+    SHA256="SHA-256:$(sha256sum "$REPOSITORY-${DOWNLOADED_FILE#"v"}.tar.bz2" | awk '{print $1}')"
+fi
 
 # Create Github download URL
 URL="https://${AUTHOR}.github.io/${REPOSITORY}/$REPOSITORY-${DOWNLOADED_FILE#"v"}.tar.bz2"
