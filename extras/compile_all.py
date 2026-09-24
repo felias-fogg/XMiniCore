@@ -13,6 +13,7 @@ Needs arduino-cli with the core installed. Standard library apart from that.
 import argparse
 import itertools
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -32,6 +33,50 @@ void loop() {
   delay(500);
 }
 """
+
+
+def build_properties(platform: dict) -> set:
+    """
+    Which {build.*} properties the compile recipes actually use. A menu that sets
+    only other ones cannot change the binary, however many options it has.
+    """
+    used = set()
+    for key, value in platform.items():
+        if key.startswith("recipe.") and ".o.pattern" in key + ".combine.pattern":
+            used.update(re.findall(r"\{(build\.[\w.]+)\}", value))
+    for key in ("recipe.c.combine.pattern", "recipe.ar.pattern"):
+        used.update(re.findall(r"\{(build\.[\w.]+)\}", platform.get(key, "")))
+    return used
+
+
+def affects_the_build(boards: dict, menu: str, relevant: set) -> bool:
+    """Whether any option of this menu sets something a compile recipe reads."""
+    marker = f".menu.{menu}."
+    for key in boards:
+        if marker not in key:
+            continue
+        tail = key.split(marker, 1)[1]
+        if "." not in tail:
+            continue
+        prop = tail.split(".", 1)[1]
+        if prop.startswith("compiler.") or prop in relevant:
+            return True
+    return False
+
+
+def menus_worth_varying(boards: dict, platform: dict) -> list:
+    """
+    The menus that can change the binary, saying which ones are left out. The
+    others still get built, just in one of their settings rather than all.
+    """
+    relevant = build_properties(platform)
+    every = sorted({k.split(".menu.")[1].split(".")[0] for k in boards
+                    if ".menu." in k})
+    wanted = [m for m in every if affects_the_build(boards, m, relevant)]
+    skipped = [m for m in every if m not in wanted]
+    if skipped:
+        print(f"not varying {', '.join(skipped)}: no compile recipe reads what they set")
+    return wanted
 
 
 def menu_options(boards: dict, board: str) -> dict:
@@ -75,12 +120,17 @@ def main() -> int:
     parser.add_argument("--fqbn-prefix", required=True, help="e.g. XMiniCore:avr")
     parser.add_argument("--root", help="the core's folder (default: the one above this)")
     parser.add_argument("--menus", help="only vary these menus, comma separated")
+    parser.add_argument("--all-menus", action="store_true",
+                        help="also vary menus that cannot change the binary")
     parser.add_argument("--quiet", action="store_true", help="only report failures")
     args = parser.parse_args()
 
     root = args.root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     boards = properties(os.path.join(root, "boards.txt"))
+    platform = properties(os.path.join(root, "platform.txt"))
     wanted = args.menus.split(",") if args.menus else None
+    if wanted is None and not args.all_menus:
+        wanted = menus_worth_varying(boards, platform)
 
     failed, count = [], 0
     with tempfile.TemporaryDirectory() as folder:
