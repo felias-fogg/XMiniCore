@@ -44,12 +44,18 @@ jobs:
 
       - name: Put the core where arduino-cli finds it
         run: |
-          arduino-cli config init
-          SKETCHBOOK=$(arduino-cli config get directories.user)
+          set -x
+          arduino-cli version
+          arduino-cli config init --overwrite
+          SKETCHBOOK="$(arduino-cli config get directories.user)"
+          echo "sketchbook is $SKETCHBOOK"
           mkdir -p "$SKETCHBOOK/hardware/XMiniCore"
           cp -r XMiniCore "$SKETCHBOOK/hardware/XMiniCore/avr"
-          arduino-cli core install arduino:avr      # for the toolchain the core uses
+          ls "$SKETCHBOOK/hardware/XMiniCore/avr"
+          arduino-cli core update-index              # nothing is installable without it
+          arduino-cli core install arduino:avr       # for the toolchain the core uses
           arduino-cli core list
+          arduino-cli board listall | head -20
 
       - name: Compile a sketch for every board and every menu combination
         run: python3 XMiniCore/extras/compile_all.py --fqbn-prefix XMiniCore:avr
