@@ -1,4 +1,11 @@
 # CHANGELOG
+## v1.3.1
+- The LTO menu now really switches LTO off: -flto was still in
+  compiler.optimization_flags, so it was passed whatever the menu said,
+  and only the archiver changed. With LTO in effect, avr-gcc 7.3 drops
+  class information from the debug data.
+- version= in platform.txt was still at 1.2.4
+
 ## v1.3.0
 - LTO can now be manually enabled and disabled and is not any longer
   dependent on the "Optimize for Debug" setting.
