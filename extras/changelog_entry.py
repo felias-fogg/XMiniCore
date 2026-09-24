@@ -15,7 +15,8 @@ def main() -> int:
     if len(sys.argv) != 2:
         print("usage: changelog_entry.py <version>", file=sys.stderr)
         return 1
-    version = sys.argv[1].lstrip("v")
+    # A pre-release has no entry of its own: v1.3.2-rc4 belongs to 1.3.2.
+    version = sys.argv[1].lstrip("v").split("-", 1)[0]
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     path = os.path.join(root, "CHANGELOG.md")
     with open(path, encoding="utf-8", errors="replace") as src:
