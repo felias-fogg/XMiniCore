@@ -104,6 +104,14 @@ jobs:
           path: pages
           fetch-depth: 0
 
+      - name: Offer the current avrdude
+        working-directory: pages
+        run: |
+          # Adds the newest avrdude release to the index when it is not there
+          # yet, and says so and stops when it is. Has to run before the core
+          # entry, which depends on the newest avrdude the index knows.
+          bash Add_avrdude_release.sh
+
       - name: Add this version to the board manager index
         working-directory: pages
         run: |

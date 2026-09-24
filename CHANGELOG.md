@@ -4,6 +4,8 @@
   below paths that contain a blank, so the hook scripts are exercised where
   they are actually used
 - pragma.sh called the compiler unquoted
+- Every release now offers the newest avrdude: the workflow adds it to the
+  index before the core entry, which then depends on it (8.1 -> 8.3)
 
 ## v1.3.2
 - The LTO menu was attached to a misspelled board id on the 168pb Xplained
