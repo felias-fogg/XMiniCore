@@ -209,38 +209,81 @@ def build_them_all(sketch: str, every: list, timeout: int) -> tuple:
     return failed, time.monotonic() - started
 
 
+def tail_of(logfile: str, lines: int) -> list:
+    """The last lines of a build log, because what went wrong is at the end of it."""
+    try:
+        with open(logfile, encoding="utf-8", errors="replace") as log:
+            return log.read().strip().splitlines()[-lines:]
+    except OSError:
+        return []
+
+
+def show_tail(logfile: str, why: str, lines: int = 15) -> None:
+    """Say how far the build had got."""
+    tail = tail_of(logfile, lines)
+    if not tail:
+        print(f"    it had not said anything at all {why}", flush=True)
+        return
+    print(f"    what it had got to {why}:", flush=True)
+    print("      " + "\n      ".join(tail), flush=True)
+
+
+def kill_the_lot(proc: subprocess.Popen) -> None:
+    """
+    Stop the build and everything it has started. Killing arduino-cli on its own
+    leaves the compiler it is waiting for running, and under Windows those keep
+    the log file open for as long as they live.
+    """
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)], check=False,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    proc.kill()
+    try:
+        proc.wait(timeout=30)
+    except subprocess.TimeoutExpired:
+        pass
+
+
 def compile_one(sketch: str, fqbn: str, number: int, total: int,
                 timeout: int) -> bool:
-    """Build one combination, saying how it went and how far along we are."""
+    """
+    Build one combination, saying how it went and how far along we are.
+
+    The build writes into a file rather than into a pipe. Under Windows every
+    process arduino-cli starts inherits that pipe, and a pipe has only reached
+    its end once the last of them has let go of it, so a build that finished
+    long ago can leave us waiting for output nobody is going to write. A file
+    has no such end to wait for, and it outlives the build, so one that had to
+    be given up on can still be read afterwards.
+    """
     build = os.path.join(os.path.dirname(sketch), "build path")
-    started = time.monotonic()
+    logfile = os.path.join(os.path.dirname(sketch), "build.log")
+    started, code = time.monotonic(), None
     try:
-        done = subprocess.run(["arduino-cli", "compile", "--clean", "-b", fqbn,
-                               "--build-path", build, sketch],
-                              capture_output=True, text=True, check=False,
-                              timeout=timeout)
-    except subprocess.TimeoutExpired as expired:
-        print(f"[{number:>3}/{total}] STUCK  {timeout:5.0f} s  {fqbn}\n"
-              "    still going after the time allowed, so it is not slow but stuck",
-              flush=True)
-        for stream, what in ((expired.stdout, "output"), (expired.stderr, "errors")):
-            text = (stream or b"").decode("utf-8", "replace") if isinstance(
-                stream, bytes) else (stream or "")
-            if text.strip():
-                tail = text.strip().splitlines()[-15:]
-                print(f"    last {what} before it stopped:", flush=True)
-                print("      " + "\n      ".join(tail), flush=True)
-        return False
+        with open(logfile, "w", encoding="utf-8", errors="replace") as log:
+            proc = subprocess.Popen(["arduino-cli", "compile", "--clean", "-b", fqbn,
+                                     "--build-path", build, sketch],
+                                    stdin=subprocess.DEVNULL, stdout=log,
+                                    stderr=subprocess.STDOUT)
+            try:
+                code = proc.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                kill_the_lot(proc)
     except OSError as err:
         print(f"[{number:>3}/{total}] FAILED        {fqbn}\n    {err}", flush=True)
         return False
     took = time.monotonic() - started
-    mark = "ok    " if done.returncode == 0 else "FAILED"
-    print(f"[{number:>3}/{total}] {mark} {took:5.1f} s  {fqbn}", flush=True)
-    if done.returncode != 0:
-        print("    " + (done.stderr or done.stdout).strip().replace("\n", "\n    "),
+    if code is None:
+        print(f"[{number:>3}/{total}] STUCK  {timeout:5.0f} s  {fqbn}\n"
+              "    still going after the time allowed, so it is not slow but stuck",
               flush=True)
-    return done.returncode == 0
+        show_tail(logfile, "before it was stopped")
+        return False
+    print(f"[{number:>3}/{total}] {'ok    ' if code == 0 else 'FAILED'} "
+          f"{took:5.1f} s  {fqbn}", flush=True)
+    if code != 0:
+        show_tail(logfile, "before it gave up", lines=30)
+    return code == 0
 
 
 def main() -> int:
