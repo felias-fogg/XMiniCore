@@ -87,18 +87,12 @@ jobs:
           arduino-cli board listall | head -20
 
       - name: Compile
-        env:
-          # Linux looks for a broken menu option and builds accordingly. The
-          # other two are here for the hook scripts and the handling of paths,
-          # and neither depends on the board or the menu entry, so one build
-          # says everything they can say. On Windows that build costs a minute:
-          # roughly fifty compiler processes, and every process start is
-          # expensive there.
-          COVERAGE: ${{ runner.os == 'Linux' && 'auto' || 'one' }}
-          MAX_BUILDS: ${{ runner.os == 'Linux' && '0' || '1' }}
         run: |
+          # Every platform builds every combination that can change the binary.
+          # Windows was held to one of them while a build there seemed to cost
+          # a minute; it costs eight seconds, and the minute was a full-disk
+          # search in the prebuild hook rather than a build at all.
           python XMiniCore/extras/compile_all.py --fqbn-prefix XMiniCore:avr \
-                 --coverage "$COVERAGE" --max-builds "$MAX_BUILDS" \
                  --work-dir "$HOME/work with blank" --timeout 300
 
       - name: Check that the prebuild hook picks up the pragmas
