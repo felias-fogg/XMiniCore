@@ -139,17 +139,17 @@ atmega168pb_xplained_mini.bootloader.lock_bits=0xFF
 atmega168pb_xplained_mini.bootloader.extended_fuses=0xFF
 
 # Compiler link time optimization
-atmega168pb_explained_mini.menu.LTO.Os_flto=LTO enabled
-atmega168pb_explained_mini.menu.LTO.Os_flto.compiler.c.extra_flags=-Wextra -flto -g
-atmega168pb_explained_mini.menu.LTO.Os_flto.compiler.c.elf.extra_flags=-w -flto -g
-atmega168pb_explained_mini.menu.LTO.Os_flto.compiler.cpp.extra_flags=-Wextra -flto -g
-atmega168pb_explained_mini.menu.LTO.Os_flto.ltoarcmd=avr-gcc-ar
+atmega168pb_xplained_mini.menu.LTO.Os_flto=LTO enabled
+atmega168pb_xplained_mini.menu.LTO.Os_flto.compiler.c.extra_flags=-Wextra -flto -g
+atmega168pb_xplained_mini.menu.LTO.Os_flto.compiler.c.elf.extra_flags=-w -flto -g
+atmega168pb_xplained_mini.menu.LTO.Os_flto.compiler.cpp.extra_flags=-Wextra -flto -g
+atmega168pb_xplained_mini.menu.LTO.Os_flto.ltoarcmd=avr-gcc-ar
 
-atmega168pb_explained_mini.menu.LTO.Os=LTO disabled
-atmega168pb_explained_mini.menu.LTO.Os.compiler.c.extra_flags=
-atmega168pb_explained_mini.menu.LTO.Os.compiler.c.elf.extra_flags=
-atmega168pb_explained_mini.menu.LTO.Os.compiler.cpp.extra_flags=
-atmega168pb_explained_mini.menu.LTO.Os.ltoarcmd=avr-ar
+atmega168pb_xplained_mini.menu.LTO.Os=LTO disabled
+atmega168pb_xplained_mini.menu.LTO.Os.compiler.c.extra_flags=
+atmega168pb_xplained_mini.menu.LTO.Os.compiler.c.elf.extra_flags=
+atmega168pb_xplained_mini.menu.LTO.Os.compiler.cpp.extra_flags=
+atmega168pb_xplained_mini.menu.LTO.Os.ltoarcmd=avr-ar
 
 # Clock frequencies
 atmega168pb_xplained_mini.menu.clock.16MHz=16 MHz

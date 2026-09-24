@@ -1,4 +1,11 @@
 # CHANGELOG
+## v1.3.2
+- The LTO menu was attached to a misspelled board id on the 168pb Xplained
+  Mini, so that board never offered it
+- A release workflow, a consistency check for the core (extras/check_core.py)
+  and a compile run over every board and menu combination
+  (extras/compile_all.py)
+
 ## v1.3.1
 - The LTO menu now really switches LTO off: -flto was still in
   compiler.optimization_flags, so it was passed whatever the menu said,

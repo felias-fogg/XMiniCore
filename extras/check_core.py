@@ -11,6 +11,7 @@ warnings are printed and do not.
 """
 
 import argparse
+import difflib
 import os
 import re
 import sys
@@ -74,6 +75,43 @@ def check_boards(root: str, boards: dict) -> None:
         variant = boards.get(f"{board}.build.variant")
         if variant and not os.path.isdir(os.path.join(root, "variants", variant)):
             problem(f"board '{board}' uses variant '{variant}', which has no folder")
+
+
+def check_orphans(boards: dict) -> None:
+    """
+    Every property belongs to a board, and a board is something with a name. A
+    property whose prefix is no board is usually a typo in the board id, and it
+    does nothing at all: the board silently lacks whatever was meant for it.
+    """
+    ids = set(board_ids(boards))
+    orphans: dict = {}
+    for key in boards:
+        head = key.split(".")[0]
+        if head in ids or head in ("menu", "compiler", "build", "recipe", "tools"):
+            continue
+        if f"{head}.name" in boards:
+            continue
+        orphans.setdefault(head, 0)
+        orphans[head] += 1
+    for head, number in sorted(orphans.items()):
+        closest = difflib.get_close_matches(head, ids, n=1, cutoff=0.7)
+        hint = f", did you mean '{closest[0]}'" if closest else ""
+        problem(f"'{head}' has {number} propertie(s) but is not a board{hint}")
+
+
+def check_menu_coverage(boards: dict) -> None:
+    """
+    A menu that some boards offer and others do not is worth a look: usually a
+    board was forgotten when the menu was added.
+    """
+    ids = board_ids(boards)
+    for menu in sorted({k.split(".")[2] for k in boards
+                        if k.count(".") >= 3 and k.split(".")[1] == "menu"
+                        and k.split(".")[0] in ids}):
+        without = [b for b in ids
+                   if not any(k.startswith(f"{b}.menu.{menu}.") for k in boards)]
+        if without and len(without) < len(ids):
+            warn(f"menu '{menu}' is missing on {', '.join(without)}")
 
 
 def check_menus(boards: dict) -> None:
@@ -176,6 +214,8 @@ def main() -> int:
     print(f"  {len(board_ids(boards))} boards, {len(platform)} platform properties")
 
     check_boards(root, boards)
+    check_orphans(boards)
+    check_menu_coverage(boards)
     check_menus(boards)
     check_lto(boards, platform)
     check_hook_scripts(root, platform)
