@@ -90,12 +90,15 @@ jobs:
         env:
           # Linux looks for a broken menu option and builds accordingly. The
           # other two are here for the hook scripts and the handling of paths,
-          # and those do not care which menu entry was chosen, so one build per
-          # board says everything they can say.
+          # and neither depends on the board or the menu entry, so one build
+          # says everything they can say. On Windows that build costs a minute:
+          # roughly fifty compiler processes, and every process start is
+          # expensive there.
           COVERAGE: ${{ runner.os == 'Linux' && 'auto' || 'one' }}
+          MAX_BUILDS: ${{ runner.os == 'Linux' && '0' || '1' }}
         run: |
           python XMiniCore/extras/compile_all.py --fqbn-prefix XMiniCore:avr \
-                 --coverage "$COVERAGE"
+                 --coverage "$COVERAGE" --max-builds "$MAX_BUILDS"
 
   release:
     name: Publish

@@ -237,6 +237,10 @@ def main() -> int:
     parser.add_argument("--menus", help="only vary these menus, comma separated")
     parser.add_argument("--all-menus", action="store_true",
                         help="also vary menus that cannot change the binary")
+    parser.add_argument("--max-builds", type=int, default=0, metavar="N",
+                        help="stop after N builds. Where the point is the platform "
+                             "rather than the options, one is enough, and on Windows "
+                             "a build costs a minute")
     parser.add_argument("--coverage", default="auto",
                         choices=["auto", "full", "each-value", "one"],
                         help="how much to build: every combination, every option "
@@ -264,6 +268,9 @@ def main() -> int:
             for combination in chosen_combinations(offered, args.coverage):
                 fqbn = f"{args.fqbn_prefix}:{board}"
                 every.append(fqbn + (f":{combination}" if combination else ""))
+        if args.max_builds and len(every) > args.max_builds:
+            print(f"{len(every)} combinations, building the first {args.max_builds}")
+            every = every[:args.max_builds]
         failed, spent = build_them_all(sketch, every)
 
     print(f"{len(every)} combination(s) in {spent / 60:.1f} min, {len(failed)} failed")
