@@ -1,4 +1,9 @@
 # CHANGELOG
+## v1.3.0
+- LTO can now be manually enabled and disabled and is not any longer
+  dependent on the "Optimize for Debug" setting.
+- Windows batch files hardened against space in pathnames
+
 ## v1.2.4
 - New PyAvrOCD version 1.5.8 (with new avr-gdb client 17.2.2
   that does not crash anymore in Ubuntu 24.04).

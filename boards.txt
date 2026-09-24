@@ -6,6 +6,7 @@
 menu.clock=Clock
 menu.debug=Debug
 menu.eeprom=EEPROM
+menu.LTO=Compiler LTO
 
 #--------------------------------------------------------------------------------------#
 
@@ -29,6 +30,19 @@ atmega328p_xplained_mini.bootloader.unlock_bits=0xFF
 atmega328p_xplained_mini.bootloader.lock_bits=0xFF
 #atmega328p_xplained_mini.bootloader.low_fuses=0xC0
 atmega328p_xplained_mini.bootloader.extended_fuses=0xFD
+
+# Compiler link time optimization
+atmega328p_xplained_mini.menu.LTO.Os_flto=LTO enabled
+atmega328p_xplained_mini.menu.LTO.Os_flto.compiler.c.extra_flags=-Wextra -flto -g
+atmega328p_xplained_mini.menu.LTO.Os_flto.compiler.c.elf.extra_flags=-w -flto -g
+atmega328p_xplained_mini.menu.LTO.Os_flto.compiler.cpp.extra_flags=-Wextra -flto -g
+atmega328p_xplained_mini.menu.LTO.Os_flto.ltoarcmd=avr-gcc-ar
+
+atmega328p_xplained_mini.menu.LTO.Os=LTO disabled
+atmega328p_xplained_mini.menu.LTO.Os.compiler.c.extra_flags=
+atmega328p_xplained_mini.menu.LTO.Os.compiler.c.elf.extra_flags=
+atmega328p_xplained_mini.menu.LTO.Os.compiler.cpp.extra_flags=
+atmega328p_xplained_mini.menu.LTO.Os.ltoarcmd=avr-ar
 
 # Clock frequencies
 atmega328p_xplained_mini.menu.clock.16MHz=16 MHz
@@ -68,6 +82,19 @@ atmega328pb_xplained_mini.bootloader.unlock_bits=0xFF
 atmega328pb_xplained_mini.bootloader.lock_bits=0xFF
 #atmega328pb_xplained_mini.bootloader.low_fuses=0xF0
 atmega328pb_xplained_mini.bootloader.extended_fuses=0xFD
+
+# Compiler link time optimization
+atmega328pb_xplained_mini.menu.LTO.Os_flto=LTO enabled
+atmega328pb_xplained_mini.menu.LTO.Os_flto.compiler.c.extra_flags=-Wextra -flto -g
+atmega328pb_xplained_mini.menu.LTO.Os_flto.compiler.c.elf.extra_flags=-w -flto -g
+atmega328pb_xplained_mini.menu.LTO.Os_flto.compiler.cpp.extra_flags=-Wextra -flto -g
+atmega328pb_xplained_mini.menu.LTO.Os_flto.ltoarcmd=avr-gcc-ar
+
+atmega328pb_xplained_mini.menu.LTO.Os=LTO disabled
+atmega328pb_xplained_mini.menu.LTO.Os.compiler.c.extra_flags=
+atmega328pb_xplained_mini.menu.LTO.Os.compiler.c.elf.extra_flags=
+atmega328pb_xplained_mini.menu.LTO.Os.compiler.cpp.extra_flags=
+atmega328pb_xplained_mini.menu.LTO.Os.ltoarcmd=avr-ar
 
 # Clock frequencies
 atmega328pb_xplained_mini.menu.clock.16MHz=16 MHz
@@ -110,6 +137,19 @@ atmega168pb_xplained_mini.bootloader.unlock_bits=0xFF
 atmega168pb_xplained_mini.bootloader.lock_bits=0xFF
 #atmega168pb_xplained_mini.bootloader.low_fuses=0xF0
 atmega168pb_xplained_mini.bootloader.extended_fuses=0xFF
+
+# Compiler link time optimization
+atmega168pb_explained_mini.menu.LTO.Os_flto=LTO enabled
+atmega168pb_explained_mini.menu.LTO.Os_flto.compiler.c.extra_flags=-Wextra -flto -g
+atmega168pb_explained_mini.menu.LTO.Os_flto.compiler.c.elf.extra_flags=-w -flto -g
+atmega168pb_explained_mini.menu.LTO.Os_flto.compiler.cpp.extra_flags=-Wextra -flto -g
+atmega168pb_explained_mini.menu.LTO.Os_flto.ltoarcmd=avr-gcc-ar
+
+atmega168pb_explained_mini.menu.LTO.Os=LTO disabled
+atmega168pb_explained_mini.menu.LTO.Os.compiler.c.extra_flags=
+atmega168pb_explained_mini.menu.LTO.Os.compiler.c.elf.extra_flags=
+atmega168pb_explained_mini.menu.LTO.Os.compiler.cpp.extra_flags=
+atmega168pb_explained_mini.menu.LTO.Os.ltoarcmd=avr-ar
 
 # Clock frequencies
 atmega168pb_xplained_mini.menu.clock.16MHz=16 MHz
