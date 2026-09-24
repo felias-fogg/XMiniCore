@@ -10,23 +10,32 @@ REM %1 = absolute path to avr-g++
 REM %2 = sketch path
 REM %3 = build path
 REM %4 = build project name
-REM %5 = flag name ("release_flags", "debug_flags", or "cpp_flags")
+REM %5.. = flag names ("release_flags", "debug_flags", "cpp_flags")
+REM
+REM All of them are handled in one go: they are looked for in the same
+REM preprocessed source, and preprocessing the sketch is the expensive part.
 
 set "COMPILER=%~1"
 set "SKETCH_PATH=%~2"
 set "BUILD_PATH=%~3"
 set "PROJECT_NAME=%~4"
-set "FLAG_NAME=%~5"
 
 if "%COMPILER%"=="" goto :usage
 if "%SKETCH_PATH%"=="" goto :usage
 if "%BUILD_PATH%"=="" goto :usage
 if "%PROJECT_NAME%"=="" goto :usage
-if "%FLAG_NAME%"=="" goto :usage
+if "%~5"=="" goto :usage
+
+REM Everything from the fifth argument on is a flag name.
+set "FLAGS="
+:collect
+if "%~5"=="" goto :collected
+set "FLAGS=%FLAGS% %~5"
+shift /5
+goto :collect
+:collected
 
 set "IN_FILE=%SKETCH_PATH%\%PROJECT_NAME%"
-set "OUT_FILE=%BUILD_PATH%\options.%FLAG_NAME%"
-set "BAK_FILE=%OUT_FILE%.bak"
 set "TMP_OUT=%BUILD_PATH%\pragma_preproc.tmp"
 set "TMP_ERR=%BUILD_PATH%\pragma_preproc.err"
 set "TMP_HITS=%BUILD_PATH%\pragma_preproc.hits"
@@ -56,13 +65,6 @@ if not exist "%IN_FILE%" (
   exit /b 3
 )
 
-if not exist "%OUT_FILE%" (
-   copy NUL "%BAK_FILE%" >nul
-) else (
-   copy/y "%OUT_FILE%" "%BAK_FILE%" >nul
-)
-
-
 "%COMPILER%" -fpreprocessed -dD -E -x c++ "%IN_FILE%" 1>"%TMP_OUT%" 2>"%TMP_ERR%"
 if %ERRORLEVEL% EQU 1 (
   REM keep quiet by default; uncomment next 2 lines for debugging
@@ -71,12 +73,61 @@ if %ERRORLEVEL% EQU 1 (
   exit /b 4
 )
 
-set "OPTIONS="
-
-REM The loop below spends two processes and two subroutine calls on every
-REM line it is given, and preprocessed output has tens of thousands of them.
-REM One findstr over the whole file first leaves the handful that can match.
+REM The loop in :one_flag spends two processes and two subroutine calls on
+REM every line it is given, and preprocessed output has tens of thousands of
+REM them. One findstr over the whole file leaves the handful that can match,
+REM and every flag name is looked for in that handful.
 findstr /I /C:"pragma" "%TMP_OUT%" > "%TMP_HITS%"
+
+set "CHANGED=0"
+for %%F in (%FLAGS%) do call :one_flag "%%F"
+
+if !CHANGED! equ 1 (
+   echo "Options changed: Deleting cached object files"
+   del "%OSKETCH%" 2>NUL
+   del "%OCORE%" 2>NUL
+   del "%ACORE%" 2>NUL
+   set WRONG=0
+   dir /b cores 2>nul >nul
+   if !ERRORLEVEL! EQU 0 (
+      FOR /D %%P IN ("%CACHEFOLDER%\\CORES\\*") DO (
+       	  if not exist "%%P\\core.a" set WRONG=1
+       	  if not exist "%%P\\.last-used" set WRONG=1
+   	  )
+   )
+
+   if exist "%CACHEFOLDER%\\sketches" (
+      dir /a-d "%CACHEFOLDER%\\sketches" 2>nul >nul
+      if errorlevel 1 (
+      	 if exist "%CACHEFOLDER%\\cores" (
+	    dir /a-d "%CACHEFOLDER%\\cores" 2>nul >nul
+	    if errorlevel 1 (
+               if %CNT% equ 2 (
+	          if !WRONG! equ 0 (
+                     echo "Delete cached cores"
+                     rd /s/q "%CACHEFOLDER%\\cores"
+		  )
+               )
+	    )
+         )
+      )
+   ) 
+)
+
+endlocal
+exit /b 0
+
+:one_flag
+set "FLAG_NAME=%~1"
+set "OUT_FILE=%BUILD_PATH%\options.%FLAG_NAME%"
+set "BAK_FILE=%OUT_FILE%.bak"
+if not exist "%OUT_FILE%" (
+   copy NUL "%BAK_FILE%" >nul
+) else (
+   copy/y "%OUT_FILE%" "%BAK_FILE%" >nul
+)
+
+set "OPTIONS="
 
 for /f "usebackq delims=" %%L in ("%TMP_HITS%") do (
   set "LINE=%%L"
@@ -128,40 +179,9 @@ for /f "usebackq delims=" %%L in ("%TMP_HITS%") do (
 > "%OUT_FILE%" (<nul set /p ="%OPTIONS% ")
 
 FC "%OUT_FILE%" "%BAK_FILE%" > NUL
-if errorlevel 1 (
-   echo "Options changed: Deleting cached object files"
-   del "%OSKETCH%" 2>NUL
-   del "%OCORE%" 2>NUL
-   del "%ACORE%" 2>NUL
-   set WRONG=0
-   dir /b cores 2>nul >nul
-   if !ERRORLEVEL! EQU 0 (
-      FOR /D %%P IN ("%CACHEFOLDER%\\CORES\\*") DO (
-       	  if not exist "%%P\\core.a" set WRONG=1
-       	  if not exist "%%P\\.last-used" set WRONG=1
-   	  )
-   )
-
-   if exist "%CACHEFOLDER%\\sketches" (
-      dir /a-d "%CACHEFOLDER%\\sketches" 2>nul >nul
-      if errorlevel 1 (
-      	 if exist "%CACHEFOLDER%\\cores" (
-	    dir /a-d "%CACHEFOLDER%\\cores" 2>nul >nul
-	    if errorlevel 1 (
-               if %CNT% equ 2 (
-	          if !WRONG! equ 0 (
-                     echo "Delete cached cores"
-                     rd /s/q "%CACHEFOLDER%\\cores"
-		  )
-               )
-	    )
-         )
-      )
-   ) 
-)
-
-endlocal
-exit /b 0
+if errorlevel 1 set "CHANGED=1"
+del "%BAK_FILE%" >nul 2>nul
+exit /b
 
 :ltrim
 setlocal EnableDelayedExpansion
@@ -187,5 +207,5 @@ endlocal & set "%~1=%s%"
 exit /b
 
 :usage
-echo Usage: %~nx0 ^<path-to-avr-g++^> ^<sketch_path^> ^<build_path^> ^<project_name^> ^<debug_flags^|release_flags^|cpp_flags^>
+echo Usage: %~nx0 ^<path-to-avr-g++^> ^<sketch_path^> ^<build_path^> ^<project_name^> ^<flag_name^> ...
 exit /b 2
