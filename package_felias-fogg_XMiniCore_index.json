@@ -395,6 +395,49 @@
               "version": "1.5.8"
             }
           ]
+        },
+        {
+          "name": "XMiniCore",
+          "architecture": "avr",
+          "version": "1.3.0",
+          "category": "Contributed",
+          "url": "https://felias-fogg.github.io/XMiniCore/XMiniCore-1.3.0.tar.bz2",
+          "archiveFileName": "XMiniCore-1.3.0.tar.bz2",
+          "checksum": "SHA-256:367b39198303e5cf42c5744f0fd51bb801aa3d2824c8579ce36b33d96f9cd78f",
+          "size": "1161112",
+          "boards": [
+            {
+              "name": "Atmel atmega328p Xplained mini"
+            },
+            {
+              "name": "Atmel atmega328pb Xplained mini"
+            },
+            {
+              "name": "Atmel atmega168pb Xplained mini"
+            }
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "arduino",
+              "name": "avr-gcc",
+              "version": "7.3.0-atmel3.6.1-arduino7"
+            },
+            {
+              "packager": "XMiniCore",
+              "name": "avrdude",
+              "version": "8.1"
+            },
+            {
+              "packager": "arduino",
+              "name": "arduinoOTA",
+              "version": "1.3.0"
+            },
+            {
+              "packager": "XMiniCore",
+              "name": "avrocd-tools",
+              "version": "1.6.1"
+            }
+          ]
         }
       ],
       "tools": [
@@ -849,6 +892,68 @@
               "host": "i686-mingw32",
               "archiveFileName": "avrocd-tools-1.5.8-i686-mingw32.tar.gz",
               "url": "https://github.com/felias-fogg/PyAvrOCD/releases/download/v1.5.8/avrocd-tools-1.5.8-i686-mingw32.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "avrocd-tools",
+          "version": "1.6.1",
+          "systems": [
+            {
+              "size": "23654054",
+              "checksum": "SHA-256:fac23335b779a1f35dccc1d0c53f90b146f0be6a36b2426d6b88e5f92955f44e",
+              "host": "arm-linux-gnueabihf",
+              "archiveFileName": "avrocd-tools-1.6.1-arm-linux-gnueabihf.tar.gz",
+              "url": "https://github.com/felias-fogg/PyAvrOCD/releases/download/v1.6.1/avrocd-tools-1.6.1-arm-linux-gnueabihf.tar.gz"
+            },
+            {
+              "size": "25970284",
+              "checksum": "SHA-256:395a4d0093a75b21b57dbdb6c4ee2ffb24026e71a10de0a9d8c03c25853185a6",
+              "host": "aarch64-linux-gnu",
+              "archiveFileName": "avrocd-tools-1.6.1-aarch64-linux-gnu.tar.gz",
+              "url": "https://github.com/felias-fogg/PyAvrOCD/releases/download/v1.6.1/avrocd-tools-1.6.1-aarch64-linux-gnu.tar.gz"
+            },
+            {
+              "size": "39637643",
+              "checksum": "SHA-256:0f0526c197554830aa6a2b67ad0d198229632acd1618dbe826d64c81add448a4",
+              "host": "x86_64-apple-darwin",
+              "archiveFileName": "avrocd-tools-1.6.1-x86_64-apple-darwin.tar.gz",
+              "url": "https://github.com/felias-fogg/PyAvrOCD/releases/download/v1.6.1/avrocd-tools-1.6.1-x86_64-apple-darwin.tar.gz"
+            },
+            {
+              "size": "25555073",
+              "checksum": "SHA-256:e73bbf87573bd00466326e092bbe6dfd3b17d40155e229e7cf7f08349131f0ac",
+              "host": "x86_64-linux-gnu",
+              "archiveFileName": "avrocd-tools-1.6.1-x86_64-linux-gnu.tar.gz",
+              "url": "https://github.com/felias-fogg/PyAvrOCD/releases/download/v1.6.1/avrocd-tools-1.6.1-x86_64-linux-gnu.tar.gz"
+            },
+            {
+              "size": "27082915",
+              "checksum": "SHA-256:0e201573eb2a7d4ae6316597f38a9a63299b8002203374559062092099cd9f2d",
+              "host": "i686-linux-gnu",
+              "archiveFileName": "avrocd-tools-1.6.1-i686-linux-gnu.tar.gz",
+              "url": "https://github.com/felias-fogg/PyAvrOCD/releases/download/v1.6.1/avrocd-tools-1.6.1-i686-linux-gnu.tar.gz"
+            },
+            {
+              "size": "30565117",
+              "checksum": "SHA-256:d795d0f84cb6ca767493cfd31581e06cb631ef15da4abf905647e6a00ecabb42",
+              "host": "x86_64-mingw32",
+              "archiveFileName": "avrocd-tools-1.6.1-x86_64-mingw32.tar.gz",
+              "url": "https://github.com/felias-fogg/PyAvrOCD/releases/download/v1.6.1/avrocd-tools-1.6.1-x86_64-mingw32.tar.gz"
+            },
+            {
+              "size": "38407025",
+              "checksum": "SHA-256:051c01f22a2755992a99a6bd869e96e32a96bfffa7607339b265424c48da5448",
+              "host": "arm64-apple-darwin",
+              "archiveFileName": "avrocd-tools-1.6.1-arm64-apple-darwin.tar.gz",
+              "url": "https://github.com/felias-fogg/PyAvrOCD/releases/download/v1.6.1/avrocd-tools-1.6.1-arm64-apple-darwin.tar.gz"
+            },
+            {
+              "size": "28277074",
+              "checksum": "SHA-256:79faada7b82f5bc9288c9c17d3de3d579117cc6e3f09d16fa8cdf1e186e0d337",
+              "host": "i686-mingw32",
+              "archiveFileName": "avrocd-tools-1.6.1-i686-mingw32.tar.gz",
+              "url": "https://github.com/felias-fogg/PyAvrOCD/releases/download/v1.6.1/avrocd-tools-1.6.1-i686-mingw32.tar.gz"
             }
           ]
         }
