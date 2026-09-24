@@ -3,7 +3,9 @@
 - The release workflow now compiles on Linux, macOS and Windows, each time
   below paths that contain a blank, so the hook scripts are exercised where
   they are actually used
-- pragma.sh called the compiler unquoted
+- pragma.sh called the compiler unquoted, and its three rm calls had the
+  wildcard inside the quotes, so the cached object files it meant to remove
+  when the flags change were never removed
 - Every release now offers the newest avrdude: the workflow adds it to the
   index before the core entry, which then depends on it (8.1 -> 8.3)
 

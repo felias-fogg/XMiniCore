@@ -23,9 +23,9 @@ cp "$3/options.$5" "$3/options.$5.bak"
 # 'core.a', then delete the 'cores' folder.
 if  [[ $(diff -q "$3/options.$5" "$3/options.$5.bak") ]]; then
     echo "Options changed: Delete cached object files"
-    rm -rf "$3/core/*.a"
-    rm -rf "$3/core/*.o"
-    rm -rf "$3/sketch/*.a"
+    rm -rf "$3/core/"*.a
+    rm -rf "$3/core/"*.o
+    rm -rf "$3/sketch/"*.a
     
     if [[ -d $3/../../cores ]] &&  [[ -d $3/../../sketches ]]; then
         filenums=$(find "$3"/../../ -maxdepth 1 -print | wc -l)
