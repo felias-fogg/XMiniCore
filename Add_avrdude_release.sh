@@ -3,7 +3,22 @@
 AUTHOR=felias-fogg   # Github username
 REPOSITORY=XMiniCore # Github repo name
 
-AVRDUDE_VERSION="8.1"
+# Take whatever avrdude has released most recently, the way the PyAvrOCD script
+# does, instead of carrying a version number in here that ages.
+AVRDUDE_VERSION=$(curl -s https://api.github.com/repos/avrdudes/avrdude/releases/latest \
+                  | grep '"tag_name"' | awk -F\" '{print $4}' | sed 's/^v//')
+
+if [ -z "$AVRDUDE_VERSION" ]; then
+    echo "Could not find out which avrdude version is the most recent one"
+    exit 1
+fi
+
+if grep -q "avrdude_v${AVRDUDE_VERSION}_" package_${AUTHOR}_${REPOSITORY}_index.json; then
+    echo "avrdude ${AVRDUDE_VERSION} is already in the index. Nothing to do."
+    exit 1
+fi
+
+echo "Adding avrdude ${AVRDUDE_VERSION} to the index"
 
 OS_PLATFORM1="Linux_ARMv6"
 OS_PLATFORM2="Linux_ARM64"
@@ -66,12 +81,6 @@ cp "package_${AUTHOR}_${REPOSITORY}_index.json" "package_${AUTHOR}_${REPOSITORY}
 
 jq -r                                  \
 --arg avrdude_version $AVRDUDE_VERSION \
---arg os_plaform1 $OS_PLATFORM1 \
---arg os_plaform2 $OS_PLATFORM2 \
---arg os_plaform3 $OS_PLATFORM3 \
---arg os_plaform4 $OS_PLATFORM5 \
---arg os_plaform5 $OS_PLATFORM6 \
---arg os_plaform6 $OS_PLATFORM6 \
 --arg host1       $HOST1        \
 --arg host2       $HOST2        \
 --arg host3       $HOST3        \

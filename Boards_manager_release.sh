@@ -15,7 +15,17 @@ REALAUTHOR=felias-fogg   # real author
 REPOSITORY=XMiniCore  # Github repo name
 
 
-AVRDUDE_VERSION="8.1"
+# The avrdude the platform depends on has to be one the index actually offers, so
+# take the newest entry there rather than a number written down here. Run
+# Add_avrdude_release.sh first when a newer avrdude should be used.
+AVRDUDE_VERSION=$(jq -r '.packages[].tools[] | select(.name == "avrdude") | .version' \
+                  package_${REALAUTHOR}_${REPOSITORY}_index.json | sort -V | tail -1)
+
+if [ -z "$AVRDUDE_VERSION" ]; then
+    echo "The index contains no avrdude at all. Run Add_avrdude_release.sh first."
+    exit 1
+fi
+echo "Platform will depend on avrdude ${AVRDUDE_VERSION}"
 
 # Get the version number of most recent PyAvrOCD version
 PAOVERSION=$(curl -s https://api.github.com/repos/$PAOOWNER/PyAvrOCD/releases/latest | grep "tag_name" |  awk -F\" '{print $4}')
