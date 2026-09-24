@@ -15,7 +15,7 @@ fi
 
 if grep -q "avrdude_v${AVRDUDE_VERSION}_" package_${AUTHOR}_${REPOSITORY}_index.json; then
     echo "avrdude ${AVRDUDE_VERSION} is already in the index. Nothing to do."
-    exit 1
+    exit 0                      # not a failure: a release workflow calls this every time
 fi
 
 echo "Adding avrdude ${AVRDUDE_VERSION} to the index"
@@ -55,6 +55,15 @@ wget --no-verbose $URL3
 wget --no-verbose $URL4
 wget --no-verbose $URL5
 wget --no-verbose $URL6
+
+# A download that did not happen would otherwise end up in the index as a
+# zero-sized entry with the checksum of nothing.
+for f in "$FILE1" "$FILE2" "$FILE3" "$FILE4" "$FILE5" "$FILE6"; do
+    if [ ! -s "$f" ]; then
+        echo "Could not download $f - does avrdude ${AVRDUDE_VERSION} still ship it?"
+        exit 1
+    fi
+done
 
 SIZE1=$(wc -c $FILE1 | awk '{print $1}')
 SIZE2=$(wc -c $FILE2 | awk '{print $1}')
