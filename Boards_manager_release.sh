@@ -50,8 +50,11 @@ if [ -z "$DOWNLOADED_FILE" ]; then
 fi
 echo "Packaging ${DOWNLOADED_FILE}"
 
-# Check whether most recent board file is already in the index
-if grep -q ${REPOSITORY}-${DOWNLOADED_FILE#"v"} package_${REALAUTHOR}_${REPOSITORY}_index.json; then
+# Check whether this exact version is already in the index. The archive name has
+# to be matched in full: without the extension, "XMiniCore-1.3.2" also matches
+# "XMiniCore-1.3.2-rc5.tar.bz2", and the final release would be refused because
+# one of its own release candidates is in the index.
+if grep -q "${REPOSITORY}-${DOWNLOADED_FILE#"v"}.tar.bz2" package_${REALAUTHOR}_${REPOSITORY}_index.json; then
     echo "Most recent board version is already in the index file. Nothing to do."
     exit 1
 fi
