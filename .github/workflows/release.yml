@@ -75,6 +75,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Creating the release and adding it to the index are two steps, and
+          # only the second one can fail in ways worth retrying. So skip this
+          # when the release is already there, and a re-run of the job works.
+          if gh release view "${GITHUB_REF_NAME}" > /dev/null 2>&1; then
+            echo "the release already exists, leaving it alone"
+            exit 0
+          fi
           NOTES=$(python3 extras/changelog_entry.py "${GITHUB_REF_NAME}")
           PRE=""
           case "${GITHUB_REF_NAME}" in *-*) PRE="--prerelease" ;; esac
