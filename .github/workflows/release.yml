@@ -49,7 +49,10 @@ jobs:
           # Name the directory ourselves rather than asking arduino-cli for it:
           # 'config get' does not exist in every version, and a version that does
           # not know it prints its help instead of a path.
-          SKETCHBOOK="$HOME/Arduino"
+          # The blank is deliberate: {runtime.platform.path} ends up in every
+          # recipe and in the hook scripts, and an unquoted use of it only shows
+          # when the path has one.
+          SKETCHBOOK="$HOME/Arduino with blank"
           arduino-cli config init --overwrite
           arduino-cli config set directories.user "$SKETCHBOOK"
           mkdir -p "$SKETCHBOOK/hardware/XMiniCore"

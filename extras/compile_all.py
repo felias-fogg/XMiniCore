@@ -57,8 +57,12 @@ def combinations(offered: dict) -> list:
 
 
 def write_sketch(folder: str) -> str:
-    """Put a sketch that uses the usual suspects where arduino-cli can build it."""
-    sketch = os.path.join(folder, "compile_all_probe")
+    """
+    Put a sketch where arduino-cli can build it, below a directory whose name has
+    a blank in it. The sketch name itself must not have one, but everything above
+    it may, and that is where an unquoted path in a recipe shows up.
+    """
+    sketch = os.path.join(folder, "with blank", "compile_all_probe")
     os.makedirs(sketch, exist_ok=True)
     with open(os.path.join(sketch, "compile_all_probe.ino"), "w", encoding="utf-8") as out:
         out.write(SKETCH)
@@ -90,8 +94,10 @@ def main() -> int:
                 if combination:
                     fqbn += f":{combination}"
                 count += 1
+                build = os.path.join(os.path.dirname(sketch), "build path")
                 done = subprocess.run(["arduino-cli", "compile", "--clean", "-b", fqbn,
-                                       sketch], capture_output=True, text=True, check=False)
+                                       "--build-path", build, sketch],
+                                      capture_output=True, text=True, check=False)
                 if done.returncode == 0:
                     if not args.quiet:
                         print(f"  ok      {fqbn}")
