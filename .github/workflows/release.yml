@@ -29,29 +29,35 @@ jobs:
         run: python3 extras/check_core.py --tag "${GITHUB_REF_NAME}"
 
   compile:
-    name: Compile for every board
-    runs-on: ubuntu-latest
+    name: Compile on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     needs: check
+    strategy:
+      fail-fast: false          # one platform failing should not hide the others
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash             # also on Windows, where the hooks are .bat anyway
     steps:
       - uses: actions/checkout@v4
         with:
           path: XMiniCore
 
-      - name: Install arduino-cli
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh -s 0.35.3
-          echo "$PWD/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: arduino/setup-arduino-cli@v2
 
       - name: Put the core where arduino-cli finds it
         run: |
           set -x
           arduino-cli version
-          # Name the directory ourselves rather than asking arduino-cli for it:
-          # 'config get' does not exist in every version, and a version that does
-          # not know it prints its help instead of a path.
           # The blank is deliberate: {runtime.platform.path} ends up in every
           # recipe and in the hook scripts, and an unquoted use of it only shows
-          # when the path has one.
+          # when the path has one. Naming the directory ourselves is safer than
+          # asking arduino-cli, whose 'config get' does not exist everywhere.
           SKETCHBOOK="$HOME/Arduino with blank"
           arduino-cli config init --overwrite
           arduino-cli config set directories.user "$SKETCHBOOK"
@@ -65,7 +71,7 @@ jobs:
           arduino-cli board listall | head -20
 
       - name: Compile a sketch for every board and every menu combination
-        run: python3 XMiniCore/extras/compile_all.py --fqbn-prefix XMiniCore:avr
+        run: python XMiniCore/extras/compile_all.py --fqbn-prefix XMiniCore:avr
 
   release:
     name: Publish

@@ -1,4 +1,10 @@
 # CHANGELOG
+## v1.3.3
+- The release workflow now compiles on Linux, macOS and Windows, each time
+  below paths that contain a blank, so the hook scripts are exercised where
+  they are actually used
+- pragma.sh called the compiler unquoted
+
 ## v1.3.2
 - The LTO menu was attached to a misspelled board id on the 168pb Xplained
   Mini, so that board never offered it
