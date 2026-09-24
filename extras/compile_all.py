@@ -195,12 +195,12 @@ def left_to_go(done_so_far: int, total: int, spent: float) -> str:
     return f", about {remaining / 60:.0f} min left" if remaining > 90 else ""
 
 
-def build_them_all(sketch: str, every: list) -> tuple:
+def build_them_all(sketch: str, every: list, timeout: int) -> tuple:
     """Build the lot, reporting progress as it goes. Returns failures and seconds."""
     print(f"{len(every)} combination(s) to build", flush=True)
     failed, started = [], time.monotonic()
     for number, fqbn in enumerate(every, start=1):
-        if not compile_one(sketch, fqbn, number, len(every)):
+        if not compile_one(sketch, fqbn, number, len(every), timeout):
             failed.append(fqbn)
         spent = time.monotonic() - started
         if number % 10 == 0 and number != len(every):
@@ -209,14 +209,28 @@ def build_them_all(sketch: str, every: list) -> tuple:
     return failed, time.monotonic() - started
 
 
-def compile_one(sketch: str, fqbn: str, number: int, total: int) -> bool:
+def compile_one(sketch: str, fqbn: str, number: int, total: int,
+                timeout: int) -> bool:
     """Build one combination, saying how it went and how far along we are."""
     build = os.path.join(os.path.dirname(sketch), "build path")
     started = time.monotonic()
     try:
         done = subprocess.run(["arduino-cli", "compile", "--clean", "-b", fqbn,
                                "--build-path", build, sketch],
-                              capture_output=True, text=True, check=False)
+                              capture_output=True, text=True, check=False,
+                              timeout=timeout)
+    except subprocess.TimeoutExpired as expired:
+        print(f"[{number:>3}/{total}] STUCK  {timeout:5.0f} s  {fqbn}\n"
+              "    still going after the time allowed, so it is not slow but stuck",
+              flush=True)
+        for stream, what in ((expired.stdout, "output"), (expired.stderr, "errors")):
+            text = (stream or b"").decode("utf-8", "replace") if isinstance(
+                stream, bytes) else (stream or "")
+            if text.strip():
+                tail = text.strip().splitlines()[-15:]
+                print(f"    last {what} before it stopped:", flush=True)
+                print("      " + "\n      ".join(tail), flush=True)
+        return False
     except OSError as err:
         print(f"[{number:>3}/{total}] FAILED        {fqbn}\n    {err}", flush=True)
         return False
@@ -237,6 +251,10 @@ def main() -> int:
     parser.add_argument("--menus", help="only vary these menus, comma separated")
     parser.add_argument("--all-menus", action="store_true",
                         help="also vary menus that cannot change the binary")
+    parser.add_argument("--timeout", type=int, default=300, metavar="SECONDS",
+                        help="give up on a build that takes longer and say so. A "
+                             "build that hangs looks exactly like a slow one until "
+                             "somebody puts a clock on it")
     parser.add_argument("--work-dir", metavar="DIR",
                         help="where to put the sketch and the build. A temporary "
                              "directory by default, but on Windows the build has "
@@ -276,7 +294,7 @@ def main() -> int:
         if args.max_builds and len(every) > args.max_builds:
             print(f"{len(every)} combinations, building the first {args.max_builds}")
             every = every[:args.max_builds]
-        failed, spent = build_them_all(sketch, every)
+        failed, spent = build_them_all(sketch, every, args.timeout)
 
     print(f"{len(every)} combination(s) in {spent / 60:.1f} min, {len(failed)} failed")
     return 1 if failed else 0

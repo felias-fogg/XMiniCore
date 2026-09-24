@@ -45,9 +45,14 @@ def build(fqbn: str, folder: str) -> str:
     with open(os.path.join(sketch, "hook_probe.ino"), "w", encoding="utf-8") as out:
         out.write(SKETCH)
     build_path = os.path.join(folder, "with blank", "build path")
-    done = subprocess.run(["arduino-cli", "compile", "--clean", "-b", fqbn,
-                           "--build-path", build_path, sketch],
-                          capture_output=True, text=True, check=False)
+    try:
+        done = subprocess.run(["arduino-cli", "compile", "--clean", "-b", fqbn,
+                               "--build-path", build_path, sketch],
+                              capture_output=True, text=True, check=False, timeout=300)
+    except subprocess.TimeoutExpired:
+        print("the probe sketch is still building after five minutes, so something "
+              "is stuck rather than slow")
+        sys.exit(1)
     if done.returncode != 0:
         print("the probe sketch did not compile:")
         print((done.stderr or done.stdout).strip())
