@@ -46,12 +46,16 @@ jobs:
         run: |
           set -x
           arduino-cli version
+          # Name the directory ourselves rather than asking arduino-cli for it:
+          # 'config get' does not exist in every version, and a version that does
+          # not know it prints its help instead of a path.
+          SKETCHBOOK="$HOME/Arduino"
           arduino-cli config init --overwrite
-          SKETCHBOOK="$(arduino-cli config get directories.user)"
-          echo "sketchbook is $SKETCHBOOK"
+          arduino-cli config set directories.user "$SKETCHBOOK"
           mkdir -p "$SKETCHBOOK/hardware/XMiniCore"
           cp -r XMiniCore "$SKETCHBOOK/hardware/XMiniCore/avr"
-          ls "$SKETCHBOOK/hardware/XMiniCore/avr"
+          test -f "$SKETCHBOOK/hardware/XMiniCore/avr/boards.txt" \
+            || { echo "the core did not end up where it belongs"; exit 1; }
           arduino-cli core update-index              # nothing is installable without it
           arduino-cli core install arduino:avr       # for the toolchain the core uses
           arduino-cli core list
