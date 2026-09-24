@@ -88,8 +88,16 @@ jobs:
           arduino-cli core list
           arduino-cli board listall | head -20
 
-      - name: Compile a sketch for every board and every menu combination
-        run: python XMiniCore/extras/compile_all.py --fqbn-prefix XMiniCore:avr
+      - name: Compile
+        env:
+          # Linux looks for a broken menu option and builds accordingly. The
+          # other two are here for the hook scripts and the handling of paths,
+          # and those do not care which menu entry was chosen, so one build per
+          # board says everything they can say.
+          COVERAGE: ${{ runner.os == 'Linux' && 'auto' || 'one' }}
+        run: |
+          python XMiniCore/extras/compile_all.py --fqbn-prefix XMiniCore:avr \
+                 --coverage "$COVERAGE"
 
   release:
     name: Publish

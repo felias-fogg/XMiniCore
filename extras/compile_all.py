@@ -35,17 +35,31 @@ void loop() {
 """
 
 
-def build_properties(platform: dict) -> set:
+COMPILE_RECIPES = ("recipe.c.o.pattern", "recipe.cpp.o.pattern", "recipe.S.o.pattern",
+                   "recipe.ar.pattern", "recipe.c.combine.pattern",
+                   "recipe.preproc.macros")
+
+
+def build_properties(platform: dict, boards: dict) -> set:
     """
-    Which {build.*} properties the compile recipes actually use. A menu that sets
-    only other ones cannot change the binary, however many options it has.
+    Which properties a compile recipe reads, directly or through others. The
+    recipes rarely name a menu's property themselves: a menu sets build.xyz,
+    something composes build.extra_flags out of it, and only that appears in the
+    recipe. So follow the references until nothing new turns up.
     """
-    used = set()
-    for key, value in platform.items():
-        if key.startswith("recipe.") and ".o.pattern" in key + ".combine.pattern":
-            used.update(re.findall(r"\{(build\.[\w.]+)\}", value))
-    for key in ("recipe.c.combine.pattern", "recipe.ar.pattern"):
-        used.update(re.findall(r"\{(build\.[\w.]+)\}", platform.get(key, "")))
+    reference = re.compile(r"\{([\w.]+)\}")
+    known = dict(platform)
+    for key, value in boards.items():          # a menu may compose things as well
+        known.setdefault(key.split(".menu.")[-1].split(".", 1)[-1], value)
+    used, pending = set(), []
+    for key in COMPILE_RECIPES:
+        pending += reference.findall(platform.get(key, ""))
+    while pending:
+        name = pending.pop()
+        if name in used:
+            continue
+        used.add(name)
+        pending += reference.findall(known.get(name, ""))
     return used
 
 
@@ -64,12 +78,20 @@ def affects_the_build(boards: dict, menu: str, relevant: set) -> bool:
     return False
 
 
+def count_combinations(offered: dict) -> int:
+    """How many combinations there would be, without building the list."""
+    total = 1
+    for options in offered.values():
+        total *= len(options)
+    return total
+
+
 def menus_worth_varying(boards: dict, platform: dict) -> list:
     """
     The menus that can change the binary, saying which ones are left out. The
     others still get built, just in one of their settings rather than all.
     """
-    relevant = build_properties(platform)
+    relevant = build_properties(platform, boards)
     every = sorted({k.split(".menu.")[1].split(".")[0] for k in boards
                     if ".menu." in k})
     wanted = [m for m in every if affects_the_build(boards, m, relevant)]
@@ -80,16 +102,24 @@ def menus_worth_varying(boards: dict, platform: dict) -> list:
 
 
 def menu_options(boards: dict, board: str) -> dict:
-    """Which menus this board offers, and which options each of them has."""
+    """
+    Which menus this board offers and which options each has, in the order they
+    are declared: the first one is what the IDE offers by default.
+    """
     offered: dict = {}
     prefix = f"{board}.menu."
     for key in boards:
         if not key.startswith(prefix):
             continue
         parts = key[len(prefix):].split(".")
-        if len(parts) >= 2:
-            offered.setdefault(parts[0], set()).add(parts[1])
-    return {menu: sorted(options) for menu, options in offered.items()}
+        if len(parts) >= 2 and parts[1] not in offered.setdefault(parts[0], []):
+            offered[parts[0]].append(parts[1])
+    return offered
+
+
+def as_fqbn_part(menus: list, picked: tuple) -> str:
+    """Turn one choice per menu into the tail of an FQBN."""
+    return ",".join(f"{m}={o}" for m, o in zip(menus, picked))
 
 
 def combinations(offered: dict) -> list:
@@ -97,8 +127,35 @@ def combinations(offered: dict) -> list:
     if not offered:
         return [""]
     menus = sorted(offered)
-    return [",".join(f"{m}={o}" for m, o in zip(menus, picked))
+    return [as_fqbn_part(menus, picked)
             for picked in itertools.product(*(offered[m] for m in menus))]
+
+
+def each_value_once(offered: dict) -> list:
+    """
+    Enough combinations for every option of every menu to be built at least once.
+    Counting all menus up at the same time needs as many builds as the longest
+    menu has options, rather than their product. Catches an option that is broken
+    by itself, not two that only go wrong together.
+    """
+    if not offered:
+        return [""]
+    menus = sorted(offered)
+    longest = max(len(offered[m]) for m in menus)
+    return [as_fqbn_part(menus, tuple(offered[m][i % len(offered[m])] for m in menus))
+            for i in range(longest)]
+
+
+def defaults_only(offered: dict) -> list:
+    """
+    One combination, the one the IDE starts with. Enough where the point is the
+    platform rather than the options: the hook scripts and the handling of paths
+    do not depend on which menu entry is chosen.
+    """
+    if not offered:
+        return [""]
+    menus = sorted(offered)
+    return [as_fqbn_part(menus, tuple(offered[m][0] for m in menus))]
 
 
 def write_sketch(folder: str) -> str:
@@ -112,6 +169,20 @@ def write_sketch(folder: str) -> str:
     with open(os.path.join(sketch, "compile_all_probe.ino"), "w", encoding="utf-8") as out:
         out.write(SKETCH)
     return sketch
+
+
+FULL_PRODUCT_LIMIT = 64          # above this, 'auto' stops building every combination
+
+
+def chosen_combinations(offered: dict, coverage: str) -> list:
+    """The combinations this coverage asks for."""
+    if coverage == "one":
+        return defaults_only(offered)
+    if coverage == "each-value":
+        return each_value_once(offered)
+    if coverage == "full" or count_combinations(offered) <= FULL_PRODUCT_LIMIT:
+        return combinations(offered)
+    return each_value_once(offered)
 
 
 def compile_one(sketch: str, fqbn: str, quiet: bool) -> bool:
@@ -137,6 +208,11 @@ def main() -> int:
     parser.add_argument("--menus", help="only vary these menus, comma separated")
     parser.add_argument("--all-menus", action="store_true",
                         help="also vary menus that cannot change the binary")
+    parser.add_argument("--coverage", default="auto",
+                        choices=["auto", "full", "each-value", "one"],
+                        help="how much to build: every combination, every option "
+                             "at least once, or just the default one. 'auto' takes "
+                             "the full product while it stays small")
     parser.add_argument("--quiet", action="store_true", help="only report failures")
     args = parser.parse_args()
 
@@ -154,7 +230,7 @@ def main() -> int:
             offered = menu_options(boards, board)
             if wanted is not None:
                 offered = {m: o for m, o in offered.items() if m in wanted}
-            for combination in combinations(offered):
+            for combination in chosen_combinations(offered, args.coverage):
                 fqbn = f"{args.fqbn_prefix}:{board}"
                 every.append(fqbn + (f":{combination}" if combination else ""))
         failed = [fqbn for fqbn in every if not compile_one(sketch, fqbn, args.quiet)]

@@ -8,6 +8,11 @@
   when the flags change were never removed
 - The Windows job keeps Defender away from the build directories, which is
   what made it take forty minutes where Linux takes one
+- compile_all.py knows three coverage levels and picks one: the full product
+  while it stays small, otherwise every option at least once, which costs the
+  longest menu rather than the product of all of them. Windows and macOS build
+  one combination per board, because hook scripts and path handling do not
+  depend on the menu choice
 - compile_all.py works out which menus can change the binary and varies only
   those: debug and eeprom touch neither, so three quarters of the builds were
   the same binary over again (12 combinations instead of 48)
