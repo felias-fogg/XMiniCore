@@ -18,7 +18,9 @@ import os
 import shutil
 import subprocess
 import sys
-import tempfile
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from check_core import working_directory     # pylint: disable=wrong-import-position
 
 EXPECTED = {
     "debug_flags": "-DPROBE_DEBUG",
@@ -57,13 +59,15 @@ def main() -> int:
     """Build the probe and compare the options files with what the sketch said."""
     parser = argparse.ArgumentParser(description="check the prebuild hook")
     parser.add_argument("--fqbn", required=True, help="the board to build for")
+    parser.add_argument("--work-dir", metavar="DIR",
+                        help="where to build, a temporary directory by default")
     args = parser.parse_args()
 
     if shutil.which("arduino-cli") is None:
         print("arduino-cli is not on PATH")
         return 1
 
-    with tempfile.TemporaryDirectory() as folder:
+    with working_directory(args.work_dir) as folder:
         build_path = build(args.fqbn, folder)
         wrong = []
         for flag, expected in sorted(EXPECTED.items()):

@@ -11,13 +11,26 @@ warnings are printed and do not.
 """
 
 import argparse
+import contextlib
 import difflib
 import os
 import re
 import sys
+import tempfile
 
 PROBLEMS: list = []
 WARNINGS: list = []
+
+
+@contextlib.contextmanager
+def working_directory(given: str):
+    """The directory to work in: the one that was asked for, or a temporary one."""
+    if given:
+        os.makedirs(given, exist_ok=True)
+        yield given
+    else:
+        with tempfile.TemporaryDirectory() as folder:
+            yield folder
 
 
 def base_version(tag: str) -> str:

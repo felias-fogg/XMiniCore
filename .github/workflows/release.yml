@@ -59,8 +59,8 @@ jobs:
           # scanner opens every one of them. A parameter can only be given once,
           # so the several paths go in as one array.
           Add-MpPreference -ExclusionPath @("$HOME\Arduino with blank",
-                                            "$env:LOCALAPPDATA\Arduino15",
-                                            "$env:TEMP")
+                                            "$HOME\work with blank",
+                                            "$env:LOCALAPPDATA\Arduino15")
           Add-MpPreference -ExclusionProcess @("avr-gcc.exe", "avr-g++.exe",
                                                "avr-ar.exe", "avr-objcopy.exe",
                                                "avr-objdump.exe")
@@ -98,12 +98,14 @@ jobs:
           MAX_BUILDS: ${{ runner.os == 'Linux' && '0' || '1' }}
         run: |
           python XMiniCore/extras/compile_all.py --fqbn-prefix XMiniCore:avr \
-                 --coverage "$COVERAGE" --max-builds "$MAX_BUILDS"
+                 --coverage "$COVERAGE" --max-builds "$MAX_BUILDS" \
+                 --work-dir "$HOME/work with blank"
 
       - name: Check that the prebuild hook picks up the pragmas
         run: |
           python XMiniCore/extras/check_hooks.py \
-                 --fqbn XMiniCore:avr:atmega328p_xplained_mini
+                 --fqbn XMiniCore:avr:atmega328p_xplained_mini \
+                 --work-dir "$HOME/work with blank"
 
   release:
     name: Publish

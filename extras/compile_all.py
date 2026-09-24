@@ -17,11 +17,11 @@ import re
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from check_core import properties, board_ids      # pylint: disable=wrong-import-position
+from check_core import (properties, board_ids,    # pylint: disable=wrong-import-position
+                        working_directory)
 
 SKETCH = """
 void setup() {
@@ -237,6 +237,11 @@ def main() -> int:
     parser.add_argument("--menus", help="only vary these menus, comma separated")
     parser.add_argument("--all-menus", action="store_true",
                         help="also vary menus that cannot change the binary")
+    parser.add_argument("--work-dir", metavar="DIR",
+                        help="where to put the sketch and the build. A temporary "
+                             "directory by default, but on Windows the build has "
+                             "to sit somewhere the virus scanner has been told "
+                             "about, and that means knowing where it is")
     parser.add_argument("--max-builds", type=int, default=0, metavar="N",
                         help="stop after N builds. Where the point is the platform "
                              "rather than the options, one is enough, and on Windows "
@@ -258,7 +263,7 @@ def main() -> int:
     if wanted is None and not args.all_menus:
         wanted = menus_worth_varying(boards, platform)
 
-    with tempfile.TemporaryDirectory() as folder:
+    with working_directory(args.work_dir) as folder:
         sketch = write_sketch(folder)
         every = []
         for board in board_ids(boards):
