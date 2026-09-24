@@ -6,6 +6,8 @@
 - pragma.sh called the compiler unquoted, and its three rm calls had the
   wildcard inside the quotes, so the cached object files it meant to remove
   when the flags change were never removed
+- The Windows job keeps Defender away from the build directories, which is
+  what made it take forty minutes where Linux takes one
 - compile_all.py works out which menus can change the binary and varies only
   those: debug and eeprom touch neither, so three quarters of the builds were
   the same binary over again (12 combinations instead of 48)
