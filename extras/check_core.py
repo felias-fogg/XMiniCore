@@ -20,6 +20,15 @@ PROBLEMS: list = []
 WARNINGS: list = []
 
 
+def base_version(tag: str) -> str:
+    """
+    The version a tag belongs to. A pre-release such as v1.3.2-rc4 belongs to
+    1.3.2 and has neither a version of its own in platform.txt nor an entry of
+    its own in the changelog; that is the point of trying one out.
+    """
+    return tag.lstrip("v").split("-", 1)[0]
+
+
 def problem(text: str) -> None:
     """Record something that must be fixed before a release."""
     PROBLEMS.append(text)
@@ -190,7 +199,7 @@ def check_release(root: str, platform: dict, tag: str) -> None:
     A pre-release tag such as v1.3.2-rc1 is checked against 1.3.2: the point of
     trying one out is not having to touch the version number for every attempt.
     """
-    version = tag.lstrip("v").split("-", 1)[0]
+    version = base_version(tag)
     stated = platform.get("version")
     if stated != version:
         problem(f"platform.txt says version={stated}, but the tag says {version}")

@@ -9,14 +9,16 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from check_core import base_version          # pylint: disable=wrong-import-position
+
 
 def main() -> int:
     """Find the heading for the version and print what follows it."""
     if len(sys.argv) != 2:
         print("usage: changelog_entry.py <version>", file=sys.stderr)
         return 1
-    # A pre-release has no entry of its own: v1.3.2-rc4 belongs to 1.3.2.
-    version = sys.argv[1].lstrip("v").split("-", 1)[0]
+    version = base_version(sys.argv[1])
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     path = os.path.join(root, "CHANGELOG.md")
     with open(path, encoding="utf-8", errors="replace") as src:
