@@ -114,6 +114,21 @@ def write_sketch(folder: str) -> str:
     return sketch
 
 
+def compile_one(sketch: str, fqbn: str, quiet: bool) -> bool:
+    """Build one combination, saying what went wrong when it did."""
+    build = os.path.join(os.path.dirname(sketch), "build path")
+    done = subprocess.run(["arduino-cli", "compile", "--clean", "-b", fqbn,
+                           "--build-path", build, sketch],
+                          capture_output=True, text=True, check=False)
+    if done.returncode == 0:
+        if not quiet:
+            print(f"  ok      {fqbn}")
+        return True
+    print(f"  FAILED  {fqbn}")
+    print("    " + (done.stderr or done.stdout).strip().replace("\n", "\n    "))
+    return False
+
+
 def main() -> int:
     """Build every combination and report which ones did not come through."""
     parser = argparse.ArgumentParser(description="compile for every board and menu")
@@ -132,31 +147,19 @@ def main() -> int:
     if wanted is None and not args.all_menus:
         wanted = menus_worth_varying(boards, platform)
 
-    failed, count = [], 0
     with tempfile.TemporaryDirectory() as folder:
         sketch = write_sketch(folder)
+        every = []
         for board in board_ids(boards):
             offered = menu_options(boards, board)
             if wanted is not None:
                 offered = {m: o for m, o in offered.items() if m in wanted}
             for combination in combinations(offered):
                 fqbn = f"{args.fqbn_prefix}:{board}"
-                if combination:
-                    fqbn += f":{combination}"
-                count += 1
-                build = os.path.join(os.path.dirname(sketch), "build path")
-                done = subprocess.run(["arduino-cli", "compile", "--clean", "-b", fqbn,
-                                       "--build-path", build, sketch],
-                                      capture_output=True, text=True, check=False)
-                if done.returncode == 0:
-                    if not args.quiet:
-                        print(f"  ok      {fqbn}")
-                else:
-                    print(f"  FAILED  {fqbn}")
-                    print("    " + (done.stderr or done.stdout).strip().replace("\n", "\n    "))
-                    failed.append(fqbn)
+                every.append(fqbn + (f":{combination}" if combination else ""))
+        failed = [fqbn for fqbn in every if not compile_one(sketch, fqbn, args.quiet)]
 
-    print(f"{count} combination(s), {len(failed)} failed")
+    print(f"{len(every)} combination(s), {len(failed)} failed")
     return 1 if failed else 0
 
 
