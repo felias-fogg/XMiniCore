@@ -24,6 +24,7 @@ set "OUT_FILE=%BUILD_PATH%\options.%FLAG_NAME%"
 set "BAK_FILE=%OUT_FILE%.bak"
 set "TMP_OUT=%BUILD_PATH%\pragma_preproc.tmp"
 set "TMP_ERR=%BUILD_PATH%\pragma_preproc.err"
+set "TMP_HITS=%BUILD_PATH%\pragma_preproc.hits"
 set "OSKETCH=%BUILD_PATH%\sketch\\*.o" 
 set "OSKETCH=%OSKETCH:\\=\%"
 set "OCORE=%BUILD_PATH%\\core\\*.o" 
@@ -63,7 +64,12 @@ if %ERRORLEVEL% EQU 1 (
 
 set "OPTIONS="
 
-for /f "usebackq delims=" %%L in ("%TMP_OUT%") do (
+REM The loop below spends two processes and two subroutine calls on every
+REM line it is given, and preprocessed output has tens of thousands of them.
+REM One findstr over the whole file first leaves the handful that can match.
+findstr /I /C:"pragma" "%TMP_OUT%" > "%TMP_HITS%"
+
+for /f "usebackq delims=" %%L in ("%TMP_HITS%") do (
   set "LINE=%%L"
   set "HASH=0"
   REM 1) Convert TABs to spaces

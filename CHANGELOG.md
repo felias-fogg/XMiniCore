@@ -6,6 +6,10 @@
 - pragma.sh called the compiler unquoted, and its three rm calls had the
   wildcard inside the quotes, so the cached object files it meant to remove
   when the flags change were never removed
+- pragma.bat ran 'echo | findstr' plus two subroutine calls for every line of
+  the preprocessed source, tens of thousands of them, three times per compile.
+  A single findstr over the file now leaves the few lines that can match. This
+  was not a CI problem: it cost every Windows user minutes on every build
 - The Windows job keeps Defender away from the build directories, which is
   what made it take forty minutes where Linux takes one
 - compile_all.py knows three coverage levels and picks one: the full product
