@@ -52,20 +52,18 @@ jobs:
 
       - name: Keep Defender out of the build (Windows only)
         if: runner.os == 'Windows'
+        continue-on-error: true      # a speed-up, not a requirement
         shell: pwsh
         run: |
-          # A build writes thousands of small object files, and the real-time
-          # scanner looks at every one of them. Excluding the directories and the
-          # compilers is what makes the difference between minutes and half an
-          # hour.
-          Add-MpPreference -ExclusionPath "$HOME\Arduino with blank" `
-                           -ExclusionPath "$env:LOCALAPPDATA\Arduino15" `
-                           -ExclusionPath "$env:TEMP" `
-                           -ExclusionProcess "avr-gcc.exe" `
-                           -ExclusionProcess "avr-g++.exe" `
-                           -ExclusionProcess "avr-ar.exe" `
-                           -ExclusionProcess "avr-objcopy.exe" `
-                           -ExclusionProcess "avr-objdump.exe"
+          # A build writes thousands of small object files and the real-time
+          # scanner opens every one of them. A parameter can only be given once,
+          # so the several paths go in as one array.
+          Add-MpPreference -ExclusionPath @("$HOME\Arduino with blank",
+                                            "$env:LOCALAPPDATA\Arduino15",
+                                            "$env:TEMP")
+          Add-MpPreference -ExclusionProcess @("avr-gcc.exe", "avr-g++.exe",
+                                               "avr-ar.exe", "avr-objcopy.exe",
+                                               "avr-objdump.exe")
           Get-MpPreference | Select-Object -ExpandProperty ExclusionPath
 
       - name: Put the core where arduino-cli finds it
