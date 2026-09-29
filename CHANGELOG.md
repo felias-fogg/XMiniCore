@@ -13,8 +13,9 @@
 - The prebuild hook is called once instead of once per flag name. Both scripts
   look for all three in the same preprocessed source, but platform.txt still
   asked three times, so the sketch was preprocessed twice for nothing on every
-  build. Worth most on macOS, where the AVR toolchain is x86_64 and every
-  compiler process goes through Rosetta
+  build. Measured on one Windows machine: 8.2 s to 7.0 s per combination. The
+  macOS runner shows no clear change, which is what a saving of this size looks
+  like on a runner whose timings vary by more than that from run to run
 - The release workflow now compiles on Linux, macOS and Windows, each time
   below paths that contain a blank, so the hook scripts are exercised where
   they are actually used
