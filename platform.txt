@@ -193,6 +193,7 @@ debug.cortex-debug.custom.serverArgs.08=--atexit
 debug.cortex-debug.custom.serverArgs.09={build.atexit}
 debug.cortex-debug.custom.serverArgs.10=--elf-file
 debug.cortex-debug.custom.serverArgs.11={debug.executable}
+debug.cortex-debug.custom.serverArgs.12=--once
 
 debug.cortex-debug.custom.preLaunchCommands.0=monitor debugwire enable
 debug.cortex-debug.custom.runToEntryPoint=main

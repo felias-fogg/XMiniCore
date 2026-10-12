@@ -128,7 +128,7 @@ atmega168pb_xplained_mini.pid.0=0x2145
 atmega168pb_xplained_mini.upload_port.0.vid=0x03eb
 atmega168pb_xplained_mini.upload_port.0.pid=0x2145
 
-atmega168pb_xplained_mini.build.mcu=atmega168pb 
+atmega168pb_xplained_mini.build.mcu=atmega168pb
 atmega168pb_xplained_mini.build.board=AVR_ATMEL_ATMEGA168PB_XMINI
 atmega168pb_xplained_mini.build.core=MCUdude_corefiles
 atmega168pb_xplained_mini.build.variant=pb-variant

@@ -120,8 +120,11 @@ jobs:
             exit 0
           fi
           NOTES=$(python3 extras/changelog_entry.py "${GITHUB_REF_NAME}")
+          # Only a release candidate is preliminary. Not every tag with a
+          # hyphen: DxCore carries -pre versions that are meant to be used,
+          # and marking those as pre-releases would bury them.
           PRE=""
-          case "${GITHUB_REF_NAME}" in *-*) PRE="--prerelease" ;; esac
+          case "${GITHUB_REF_NAME}" in *-rc*) PRE="--prerelease" ;; esac
           gh release create "${GITHUB_REF_NAME}" --title "${GITHUB_REF_NAME}" \
              --notes "$NOTES" $PRE
 
@@ -131,6 +134,20 @@ jobs:
           ref: gh-pages
           path: pages
           fetch-depth: 0
+
+      - name: Which index does this tag belong in?
+        run: |
+          # Release candidates go into an index of their own: the board manager
+          # of an ordinary user never offers them, and several attempts at one
+          # version stop cluttering the stable index. The name still matches
+          # package_*_index.json, which the IDE demands of an index URL.
+          # The scripts below read INDEX_FILE and fall back to the stable name.
+          case "${GITHUB_REF_NAME}" in
+            *-rc*) INDEX=package_felias-fogg_XMiniCore_rc_index.json ;;
+            *)     INDEX=package_felias-fogg_XMiniCore_index.json ;;
+          esac
+          echo "INDEX_FILE=$INDEX" >> "$GITHUB_ENV"
+          echo "This tag goes into $INDEX"
 
       - name: Offer the current avrdude
         working-directory: pages
