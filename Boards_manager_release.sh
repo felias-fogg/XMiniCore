@@ -14,12 +14,18 @@ AUTHOR=felias-fogg       # Github user name
 REALAUTHOR=felias-fogg   # real author
 REPOSITORY=XMiniCore  # Github repo name
 
+# Which index to write. The workflow sets INDEX_FILE: a release candidate goes
+# into an index of its own, so the board manager of an ordinary user never
+# offers it. Called by hand without the variable, this is the stable index,
+# exactly as before.
+INDEX="${INDEX_FILE:-package_${REALAUTHOR}_${REPOSITORY}_index.json}"
+
 
 # The avrdude the platform depends on has to be one the index actually offers, so
 # take the newest entry there rather than a number written down here. Run
 # Add_avrdude_release.sh first when a newer avrdude should be used.
 AVRDUDE_VERSION=$(jq -r '.packages[].tools[] | select(.name == "avrdude") | .version' \
-                  package_${REALAUTHOR}_${REPOSITORY}_index.json | sort -V | tail -1)
+                  $INDEX | sort -V | tail -1)
 
 if [ -z "$AVRDUDE_VERSION" ]; then
     echo "The index contains no avrdude at all. Run Add_avrdude_release.sh first."
@@ -54,13 +60,13 @@ echo "Packaging ${DOWNLOADED_FILE}"
 # to be matched in full: without the extension, "XMiniCore-1.3.2" also matches
 # "XMiniCore-1.3.2-rc5.tar.bz2", and the final release would be refused because
 # one of its own release candidates is in the index.
-if grep -q "${REPOSITORY}-${DOWNLOADED_FILE#"v"}.tar.bz2" package_${REALAUTHOR}_${REPOSITORY}_index.json; then
+if grep -q "${REPOSITORY}-${DOWNLOADED_FILE#"v"}.tar.bz2" $INDEX; then
     echo "Most recent board version is already in the index file. Nothing to do."
     exit 1
 fi
 
 # Check whether already part of the index
-if grep -q "avrocd-tools-"${AVROCDVERSION} package_${REALAUTHOR}_${REPOSITORY}_index.json; then
+if grep -q "avrocd-tools-"${AVROCDVERSION} $INDEX; then
     echo "Current PyAvrOCD version is in index. Continue ..."
 else
     echo "Current PyAvrOCD version is not in index. Add it first."
@@ -111,7 +117,7 @@ fi
 # Create Github download URL
 URL="https://${AUTHOR}.github.io/${REPOSITORY}/$REPOSITORY-${DOWNLOADED_FILE#"v"}.tar.bz2"
 
-cp "package_${REALAUTHOR}_${REPOSITORY}_index.json" "package_${REALAUTHOR}_${REPOSITORY}_index.json.tmp"
+cp "$INDEX" "$INDEX.tmp"
 
 # Add new boards release entry
 jq -r                                    \
@@ -166,7 +172,7 @@ jq -r                                    \
       "version": $avrocdversion
     }   
   ]
-}' "package_${REALAUTHOR}_${REPOSITORY}_index.json.tmp" > "package_${REALAUTHOR}_${REPOSITORY}_index.json"
+}' "$INDEX.tmp" > "$INDEX"
 
 # Remove files that are no longer needed
-rm -rf "$REPOSITORY-${DOWNLOADED_FILE#"v"}" "package_${REALAUTHOR}_${REPOSITORY}_index.json.tmp"
+rm -rf "$REPOSITORY-${DOWNLOADED_FILE#"v"}" "$INDEX.tmp"

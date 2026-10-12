@@ -3,6 +3,12 @@
 AUTHOR=felias-fogg   # Github username
 REPOSITORY=XMiniCore # Github repo name
 
+# Which index to write. The workflow sets INDEX_FILE: a release candidate goes
+# into an index of its own, so the board manager of an ordinary user never
+# offers it. Called by hand without the variable, this is the stable index,
+# exactly as before.
+INDEX="${INDEX_FILE:-package_${AUTHOR}_${REPOSITORY}_index.json}"
+
 GCC_VERSION="15.1.0"
 MC_VERSION="4.0.0"
 MC_PATCH_LEVEL="52"
@@ -43,7 +49,7 @@ printf "File1: ${FILE1}, Size: ${SIZE1}, SHA256: ${SHASUM1}, URL1: ${URL1}\n"
 printf "File2: ${FILE2}, Size: ${SIZE2}, SHA256: ${SHASUM2}, URL2: ${URL2}\n"
 printf "File3: ${FILE3}, Size: ${SIZE3}, SHA256: ${SHASUM3}, URL3: ${URL3}\n"
 
-cp "package_${AUTHOR}_${REPOSITORY}_index.json" "package_${AUTHOR}_${REPOSITORY}_index.json.tmp"
+cp "$INDEX" "$INDEX.tmp"
 
 jq -r                                  \
 --arg arduino_version $ARDUINO_VERSION \
@@ -101,9 +107,9 @@ jq -r                                  \
       "url": $url4
     }
   ]
-}' "package_${AUTHOR}_${REPOSITORY}_index.json.tmp" > "package_${AUTHOR}_${REPOSITORY}_index.json"
+}' "$INDEX.tmp" > "$INDEX"
 
 rm $FILE1
 rm $FILE2
 rm $FILE3
-rm "package_${AUTHOR}_${REPOSITORY}_index.json.tmp"
+rm "$INDEX.tmp"

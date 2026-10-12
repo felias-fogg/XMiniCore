@@ -3,6 +3,12 @@
 AUTHOR=felias-fogg   # Github username
 REPOSITORY=XMiniCore # Github repo name
 
+# Which index to write. The workflow sets INDEX_FILE: a release candidate goes
+# into an index of its own, so the board manager of an ordinary user never
+# offers it. Called by hand without the variable, this is the stable index,
+# exactly as before.
+INDEX="${INDEX_FILE:-package_${AUTHOR}_${REPOSITORY}_index.json}"
+
 # Take whatever avrdude has released most recently, the way the PyAvrOCD script
 # does, instead of carrying a version number in here that ages.
 AVRDUDE_VERSION=$(curl -s https://api.github.com/repos/avrdudes/avrdude/releases/latest \
@@ -13,7 +19,7 @@ if [ -z "$AVRDUDE_VERSION" ]; then
     exit 1
 fi
 
-if grep -q "avrdude_v${AVRDUDE_VERSION}_" package_${AUTHOR}_${REPOSITORY}_index.json; then
+if grep -q "avrdude_v${AVRDUDE_VERSION}_" $INDEX; then
     echo "avrdude ${AVRDUDE_VERSION} is already in the index. Nothing to do."
     exit 0                      # not a failure: a release workflow calls this every time
 fi
@@ -86,7 +92,7 @@ printf "File4: ${FILE4}, Size: ${SIZE4}, SHA256: ${SHASUM4}, URL4: ${URL4}\n"
 printf "File5: ${FILE5}, Size: ${SIZE5}, SHA256: ${SHASUM5}, URL5: ${URL5}\n"
 printf "File6: ${FILE6}, Size: ${SIZE6}, SHA256: ${SHASUM6}, URL6: ${URL6}\n"
 
-cp "package_${AUTHOR}_${REPOSITORY}_index.json" "package_${AUTHOR}_${REPOSITORY}_index.json.tmp"
+cp "$INDEX" "$INDEX.tmp"
 
 jq -r                                  \
 --arg avrdude_version $AVRDUDE_VERSION \
@@ -168,7 +174,7 @@ jq -r                                  \
       "url": $url6
     }
   ]
-}' "package_${AUTHOR}_${REPOSITORY}_index.json.tmp" > "package_${AUTHOR}_${REPOSITORY}_index.json"
+}' "$INDEX.tmp" > "$INDEX"
 
 rm $FILE1
 rm $FILE2
@@ -176,4 +182,4 @@ rm $FILE3
 rm $FILE4
 rm $FILE5
 rm $FILE6
-rm "package_${AUTHOR}_${REPOSITORY}_index.json.tmp"
+rm "$INDEX.tmp"
