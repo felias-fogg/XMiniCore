@@ -191,11 +191,20 @@ def check_hook_scripts(root: str, platform: dict) -> None:
 
 def check_line_endings(root: str) -> None:
     """Windows batch files need CRLF, and git only keeps it with a rule for it."""
-    attributes = os.path.join(root, ".gitattributes")
     rule = ""
-    if os.path.exists(attributes):
-        with open(attributes, encoding="utf-8", errors="replace") as src:
-            rule = src.read()
+    folder = os.path.abspath(root)
+    while True:
+        # The core may sit in a subdirectory of its repository, and the rule
+        # then belongs to the repository rather than to the core, so look
+        # upwards until the repository itself is reached.
+        attributes = os.path.join(folder, ".gitattributes")
+        if os.path.exists(attributes):
+            with open(attributes, encoding="utf-8", errors="replace") as src:
+                rule += src.read()
+        parent = os.path.dirname(folder)
+        if parent == folder or os.path.exists(os.path.join(folder, ".git")):
+            break
+        folder = parent
     if ".bat" not in rule:
         for folder, _, files in os.walk(root):
             if ".git" in folder:
@@ -211,6 +220,11 @@ def check_release(root: str, platform: dict, tag: str) -> None:
     Before a release the version has to be stated in the two places that say it.
     A pre-release tag such as v1.3.2-rc1 is checked against 1.3.2: the point of
     trying one out is not having to touch the version number for every attempt.
+
+    A CHANGELOG.md is not required: not every core keeps one, and the script is
+    meant to be usable in those too. Where there is one, it has to mention the
+    version; where there is none, that is worth saying but not worth stopping a
+    release for.
     """
     version = base_version(tag)
     stated = platform.get("version")
@@ -218,7 +232,7 @@ def check_release(root: str, platform: dict, tag: str) -> None:
         problem(f"platform.txt says version={stated}, but the tag says {version}")
     changelog = os.path.join(root, "CHANGELOG.md")
     if not os.path.exists(changelog):
-        problem("CHANGELOG.md is missing")
+        warn("there is no CHANGELOG.md, so nothing was checked against it")
         return
     with open(changelog, encoding="utf-8", errors="replace") as src:
         text = src.read()
