@@ -143,7 +143,7 @@ This installation method requires Arduino IDE version 1.8.0 or more recent.
   https://felias-fogg.github.io/AvrDebugger/package_felias-fogg_AvrDebugger_index.json
   ```
 
-  and install `AvrDebugger` in the Boards Manager in the same way. If the IDE reports that it could not start `…/INSTALL-the-AvrDebugger-package/bin/avr-gdb`, this package is missing.
+  and install `AvrDebugger` in the Boards Manager in the same way. If you click `Debug` without it, the IDE says so in its gdb-server terminal.
 
 #### Manual Installation
 

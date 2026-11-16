@@ -4,11 +4,12 @@
   and the SVD files are now in the AvrDebugger package, which all
   debug-enabled cores share, so a new PyAvrOCD reaches every core without a
   new release of each, and the tools are installed once instead of once per
-  core. To debug, install AvrDebugger as well (see the README). Without it,
-  the IDE reports that it cannot start
-  `.../INSTALL-the-AvrDebugger-package/bin/avr-gdb`
+  core. To debug, install AvrDebugger as well (see the README)
 - PyAvrOCD is started with `--arduino-ide` instead of `--once`, and with the
   long option names
+- When AvrDebugger is missing, clicking Debug brings up the gdb-server
+  terminal, which says what to install. The stubs that do this are in
+  `INSTALL-the-AvrDebugger-package/bin`, from AvrDebugger 0.1.0-rc2
 ## v1.3.3
 - pragma.bat counted the entries of a directory with 'FIND /C /V ""', which
   counts lines only as long as FIND is the one in System32. Git for Windows
