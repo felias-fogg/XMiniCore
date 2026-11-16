@@ -9,7 +9,7 @@
   long option names
 - When AvrDebugger is missing, clicking Debug brings up the gdb-server
   terminal, which says what to install. The stubs that do this are in
-  `INSTALL-the-AvrDebugger-package/bin`, from AvrDebugger 0.1.0-rc2
+  `INSTALL-the-AvrDebugger-package/bin`, from AvrDebugger 0.1.0-rc3
 ## v1.3.3
 - pragma.bat counted the entries of a directory with 'FIND /C /V ""', which
   counts lines only as long as FIND is the one in System32. Git for Windows

@@ -1,7 +1,9 @@
 #!/bin/sh
 # Stands in for the GDB server when the AvrDebugger package is missing. The IDE
-# shows what it prints in the gdb-server terminal and brings that to the front.
-# The text has to stay identical to message.txt; the workflow checks that.
+# shows what it prints in the gdb-server terminal, brings that to the front,
+# and when the stub exits says "GDB Server Quit Unexpectedly. See gdb-server
+# output for more details." The text has to stay identical to message.txt;
+# the workflow checks that.
 cat <<'EOF'
 *** The AvrDebugger package is not installed. ***
 Debugging needs it: add
@@ -9,7 +11,4 @@ Debugging needs it: add
 to Additional Boards Manager URLs (File > Preferences) and install AvrDebugger
 with the Boards Manager.
 EOF
-# Measured with this wait: the text appears and cortex-debug ends the session
-# itself, because the stub GDB fails right after its version check.
-sleep 20
 exit 1
