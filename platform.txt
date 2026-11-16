@@ -170,9 +170,16 @@ recipe.hooks.prebuild.1.pattern.windows=cmd /C call "{runtime.platform.path}\scr
 
 # Debugger configuration (general options)
 # ----------------------------------------
+# The debug tools (PyAvrOCD, avr-gdb, simavr and the SVD files) come from the
+# AvrDebugger package, which every debug-enabled core shares. When it is
+# installed, the IDE sets runtime.tools.avr-debugger.path itself and this line
+# is overridden. When it is not, the path below is what the IDE shows in its
+# error popup, so the folder name says what to do.
+runtime.tools.avr-debugger.path={runtime.platform.path}/INSTALL-the-AvrDebugger-package
+
 debug.executable={build.path}/{build.project_name}.elf
 debug.toolchain=gcc
-debug.toolchain.path={runtime.tools.avrocd-tools.path}
+debug.toolchain.path={runtime.tools.avr-debugger.path}/bin
 
 debug.server=openocd
 debug.server.openocd.path={debug.toolchain.path}/pyavrocd
@@ -183,18 +190,18 @@ debug.cortex-debug.custom.overrideGDBServerStartedRegex=Listening on port \d+ fo
 debug.cortex-debug.custom.objdumpPath={runtime.tools.avr-gcc.path}/bin/avr-objdump
 debug.cortex-debug.custom.serverArgs.00=-s
 debug.cortex-debug.custom.serverArgs.01=nop
-debug.cortex-debug.custom.serverArgs.02=-d
+debug.cortex-debug.custom.serverArgs.02=--device
 debug.cortex-debug.custom.serverArgs.03={build.mcu}
-debug.cortex-debug.custom.serverArgs.04=-m
+debug.cortex-debug.custom.serverArgs.04=--manage
 debug.cortex-debug.custom.serverArgs.05=all
-debug.cortex-debug.custom.serverArgs.06=-F
+debug.cortex-debug.custom.serverArgs.06=--F_CPU
 debug.cortex-debug.custom.serverArgs.07={build.f_cpu}
 debug.cortex-debug.custom.serverArgs.08=--atexit
 debug.cortex-debug.custom.serverArgs.09={build.atexit}
 debug.cortex-debug.custom.serverArgs.10=--elf-file
 debug.cortex-debug.custom.serverArgs.11={debug.executable}
-debug.cortex-debug.custom.serverArgs.12=--once
+debug.cortex-debug.custom.serverArgs.12=--arduino-ide
 
 debug.cortex-debug.custom.preLaunchCommands.0=monitor debugwire enable
 debug.cortex-debug.custom.runToEntryPoint=main
-debug.svd_file={debug.toolchain.path}/pyavrocd-util/svd/{build.mcu}.svd
+debug.svd_file={runtime.tools.avr-debugger.path}/svd/{build.mcu}.svd

@@ -1,8 +1,8 @@
 # XMiniCore
 
-This is a debug-enabled Arduino core for the *ATmega Xplained Mini* series of Microchip development boards. These boards with an Arduino UNO R3 footprint contain in addition to an ATmega328P(B) or ATmega168PB MCU an embedded debugger and programmer. With [PyAvrOCD](https://pyavrocd.io), this makes them a plug-and-play solution for debugging using the Arduino IDE 2, PlatformIO, and the VS Code extension _Arduino Maker Workshop_. In other words, this is the perfect solution for developing Arduino UNO R3 projects.
+This is a debug-enabled Arduino core for the *ATmega Xplained Mini* series of Microchip development boards. These boards, with an Arduino UNO R3 footprint, contain, in addition to an ATmega328P(B) or ATmega168PB MCU, an embedded debugger and programmer. With [PyAvrOCD](https://pyavrocd.io), this makes them a plug-and-play solution for debugging using the Arduino IDE 2, PlatformIO, and the VS Code extension _Arduino Maker Workshop_. In other words, this is the perfect solution for developing Arduino UNO R3 projects.
 
-The core is a fork of [MCUdude's MiniCore](https://github.com/MCUdude/MiniCore), tailored to the pecularities of the Xplained Mini boards. It is meant to be a replacement for the [Atmel AVR Xplained-minis](https://github.com/AtmelUniversityFrance/atmel-avr-xmini-boardmanagermodule) board package.
+The core is a fork of [MCUdude's MiniCore](https://github.com/MCUdude/MiniCore), tailored to the peculiarities of the Xplained Mini boards. It is meant to be a replacement for the [Atmel AVR Xplained-minis](https://github.com/AtmelUniversityFrance/atmel-avr-xmini-boardmanagermodule) board package. Note that since version 1.4.0, debugging only works when the *AvrDebugger* package is installed additionally (see [below](#how-to-install)).
 
 # Table of contents
 
@@ -137,11 +137,19 @@ This installation method requires Arduino IDE version 1.8.0 or more recent.
 
 - After installation is complete, close the `Boards Manager` window.
 
+- In order to debug, you also need the **AvrDebugger** package, which contains the debug tools shared by all debug-enabled cores. Add its URL to `Additional Boards Manager URLs` as well (one URL per line),
+
+  ```
+  https://felias-fogg.github.io/AvrDebugger/package_felias-fogg_AvrDebugger_index.json
+  ```
+
+  and install `AvrDebugger` in the Boards Manager in the same way. If the IDE reports that it could not start `…/INSTALL-the-AvrDebugger-package/bin/avr-gdb`, this package is missing.
+
 #### Manual Installation
 
 Download the most recent release (right side on repo webpage). Extract the ZIP ar TAR.GZ file, and move the extracted folder to the location `~/Documents/Arduino/hardware/XMiniCore`. Create the `hardware` and the `XMiniCore` folder if they do not exist. Rename the extracted folder (probably something like `XMiniCore-x.y.z`) to `avr`. Open the Arduino IDE, and a new category in the boards menu called `XMiniCore (in Sketchbook)` will show up.
 
-Note that a manual installation will not download binary tools such as the most recent avrdude program and the debugging tool. 
+Note that a manual installation will not download binary tools such as the most recent avrdude program. The debug tools come with the AvrDebugger package, which you can install with the Boards Manager as described above.
 
 #### Arduino CLI Installation
 
@@ -149,6 +157,12 @@ Run the following command in a terminal:
 
 ```
 arduino-cli core install XMiniCore:avr --additional-urls https://felias-fogg.github.io/XMiniCore/package_felias-fogg_XMiniCore_index.json
+```
+
+and, for debugging,
+
+```
+arduino-cli core install AvrDebugger:avr --additional-urls https://felias-fogg.github.io/AvrDebugger/package_felias-fogg_AvrDebugger_index.json
 ```
 
 #### PlatformIO
