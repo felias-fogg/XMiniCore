@@ -171,7 +171,7 @@ recipe.hooks.prebuild.1.pattern.windows=cmd /C call "{runtime.platform.path}\scr
 # Debugger configuration (general options)
 # ----------------------------------------
 # The debug tools (PyAvrOCD, avr-gdb, simavr and the SVD files) come from the
-# AvrDebugger package, which every debug-enabled core shares. When it is
+# AvrDebugger package, which every debug-configured core shares. When it is
 # installed, the IDE sets runtime.tools.avr-debugger.path itself and this line
 # is overridden. When it is not, the path leads to the fallback stubs from
 # AvrDebugger, which say in the gdb-server terminal what to install.

@@ -1,6 +1,6 @@
 # XMiniCore
 
-This is a debug-enabled Arduino core for the *ATmega Xplained Mini* series of Microchip development boards. These boards, with an Arduino UNO R3 footprint, contain, in addition to an ATmega328P(B) or ATmega168PB MCU, an embedded debugger and programmer. With [PyAvrOCD](https://pyavrocd.io), this makes them a plug-and-play solution for debugging using the Arduino IDE 2, PlatformIO, and the VS Code extension _Arduino Maker Workshop_. In other words, this is the perfect solution for developing Arduino UNO R3 projects.
+This is a debug-configured Arduino core for the *ATmega Xplained Mini* series of Microchip development boards. These boards, with an Arduino UNO R3 footprint, contain, in addition to an ATmega328P(B) or ATmega168PB MCU, an embedded debugger and programmer. With [PyAvrOCD](https://pyavrocd.io), this makes them a plug-and-play solution for debugging using the Arduino IDE 2, PlatformIO, and the VS Code extension _Arduino Maker Workshop_. In other words, this is the perfect solution for developing Arduino UNO R3 projects.
 
 The core is a fork of [MCUdude's MiniCore](https://github.com/MCUdude/MiniCore), tailored to the peculiarities of the Xplained Mini boards. It is meant to be a replacement for the [Atmel AVR Xplained-minis](https://github.com/AtmelUniversityFrance/atmel-avr-xmini-boardmanagermodule) board package. Note that since version 1.4.0, debugging only works when the *AvrDebugger* package is installed additionally (see [below](#how-to-install)).
 
@@ -137,7 +137,7 @@ This installation method requires Arduino IDE version 1.8.0 or more recent.
 
 - After installation is complete, close the `Boards Manager` window.
 
-- In order to debug, you also need the **AvrDebugger** package, which contains the debug tools shared by all debug-enabled cores. Add its URL to `Additional Boards Manager URLs` as well (one URL per line),
+- In order to debug, you also need the **AvrDebugger** package, which contains the debug tools shared by all debug-configured cores. Add its URL to `Additional Boards Manager URLs` as well (one URL per line),
 
   ```
   https://felias-fogg.github.io/AvrDebugger/package_felias-fogg_AvrDebugger_index.json
