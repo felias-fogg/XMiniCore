@@ -5,7 +5,7 @@
 # https://arduino.github.io/arduino-cli/latest/platform-specification/
 
 name=XMiniCore
-version=1.4.0
+version=1.4.1
 
 # AVR compile variables
 # ---------------------
@@ -173,9 +173,9 @@ recipe.hooks.prebuild.1.pattern.windows=cmd /C call "{runtime.platform.path}\scr
 # The debug tools (PyAvrOCD, avr-gdb, simavr and the SVD files) come from the
 # AvrDebugger package, which every debug-enabled core shares. When it is
 # installed, the IDE sets runtime.tools.avr-debugger.path itself and this line
-# is overridden. When it is not, the path below is what the IDE shows in its
-# error popup, so the folder name says what to do.
-runtime.tools.avr-debugger.path={runtime.platform.path}/INSTALL-the-AvrDebugger-package
+# is overridden. When it is not, the path leads to the fallback stubs from
+# AvrDebugger, which say in the gdb-server terminal what to install.
+runtime.tools.avr-debugger.path={runtime.platform.path}/debugger/fallback
 
 debug.executable={build.path}/{build.project_name}.elf
 debug.toolchain=gcc

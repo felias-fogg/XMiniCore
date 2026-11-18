@@ -1,4 +1,8 @@
 # CHANGELOG
+## v1.4.1
+- The fallback stubs, which say in the gdb-server terminal that AvrDebugger is missing,
+  are now in `debugger/fallback/bin`, from AvrDebugger 0.1.1, and the message also points
+  to https://pyavrocd.io.
 ## v1.4.0
 - The debug tools no longer come with XMiniCore. PyAvrOCD, avr-gdb, simavr
   and the SVD files are now in the AvrDebugger package, which all
